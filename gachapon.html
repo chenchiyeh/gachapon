@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happy Birthday Gachapon 🎀</title>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream:     #fdf8f0;
+      --ink:       #3d2f2f;
+      --ink-soft:  #7a6060;
+      --rose:      #e8b4bc;
+      --rose-mid:  #d4909a;
+      --rose-dark: #b87080;
+      --butter:    #f0e0a0;
+    }
+
+    body {
+      font-family: 'Caveat', cursive;
+      background-color: var(--cream);
+      background-image: repeating-linear-gradient(
+        0deg, transparent, transparent 27px,
+        rgba(180,160,140,0.08) 27px, rgba(180,160,140,0.08) 28px
+      );
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 36px 16px 80px;
+      gap: 20px;
+      color: var(--ink);
+    }
+
+    .svg-filters { position: absolute; width: 0; height: 0; }
+
+    /* ── Header ── */
+    .header { text-align: center; }
+    .header-deco { font-size: 22px; letter-spacing: 4px; margin-bottom: 2px; }
+    .header-title {
+      font-family: 'Caveat', cursive;
+      font-size: clamp(32px, 7vw, 54px);
+      font-weight: 700; color: var(--rose-dark);
+      line-height: 1.1; transform: rotate(-1deg); display: inline-block;
+    }
+    .header-sub {
+      margin-top: 4px; font-size: clamp(15px, 3vw, 19px);
+      color: var(--ink-soft); font-weight: 400;
+      transform: rotate(0.5deg); display: inline-block;
+    }
+
+    /* ── Background doodle ── */
+    .bg-doodle {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none; z-index: 0; overflow: hidden;
+    }
+    .bg-doodle svg { width: 100%; height: 100%; }
+    body > *:not(.bg-doodle) { position: relative; z-index: 1; }
+
+    /* ── Machine stage ── */
+    .machine-stage {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .machine-svg-wrap {
+      position: relative;
+      width: 270px;
+    }
+    .machine-svg-wrap > svg { width: 100%; height: auto; overflow: visible; }
+
+    /* Globe balls */
+    .globe-balls {
+      display: flex; flex-wrap: wrap;
+      align-content: center; justify-content: center;
+      gap: 6px; padding: 16px;
+      width: 170px; height: 170px;
+    }
+    .globe-balls.shaking { animation: globe-shake 0.7s ease-in-out; }
+
+    @keyframes globe-shake {
+      0%   { transform: translate(0,0) rotate(0deg); }
+      12%  { transform: translate(-5px, 4px) rotate(-3deg); }
+      25%  { transform: translate(6px,-4px) rotate(3deg); }
+      38%  { transform: translate(-4px, 5px) rotate(-2deg); }
+      52%  { transform: translate(5px,-3px) rotate(2deg); }
+      65%  { transform: translate(-3px, 3px) rotate(-1deg); }
+      78%  { transform: translate(2px,-2px) rotate(0.5deg); }
+      100% { transform: translate(0,0) rotate(0deg); }
+    }
+
+    .mini-ball {
+      width: 26px; height: 26px; border-radius: 50%;
+      position: relative; flex-shrink: 0;
+      animation: bob 2.4s ease-in-out infinite;
+      outline: 2px solid rgba(60,40,40,0.18);
+    }
+    .globe-balls.shaking .mini-ball { animation: ball-shuffle 0.7s ease-in-out infinite; }
+    .globe-balls.shaking .mini-ball:nth-child(odd)  { animation-delay: 0s; }
+    .globe-balls.shaking .mini-ball:nth-child(even) { animation-delay: 0.12s; }
+
+    @keyframes ball-shuffle {
+      0%,100% { transform: translate(0,0) rotate(0deg); }
+      20%      { transform: translate(-3px,-4px) rotate(-5deg); }
+      40%      { transform: translate(4px, 3px) rotate(4deg); }
+      60%      { transform: translate(-2px, 4px) rotate(-3deg); }
+      80%      { transform: translate(3px,-2px) rotate(3deg); }
+    }
+
+    .mini-ball::after {
+      content: ''; position: absolute;
+      top: 4px; left: 6px; width: 8px; height: 5px;
+      background: rgba(255,255,255,0.55); border-radius: 50%;
+      transform: rotate(-25deg);
+    }
+    .mini-ball:nth-child(2) { animation-delay: 0.3s; }
+    .mini-ball:nth-child(3) { animation-delay: 0.6s; }
+    .mini-ball:nth-child(4) { animation-delay: 0.9s; }
+    .mini-ball:nth-child(5) { animation-delay: 1.2s; }
+    .mini-ball:nth-child(6) { animation-delay: 1.5s; }
+    .mini-ball:nth-child(7) { animation-delay: 0.15s; }
+    .mini-ball:nth-child(8) { animation-delay: 0.45s; }
+    .mini-ball:nth-child(9) { animation-delay: 0.75s; }
+
+    @keyframes bob {
+      0%, 100% { transform: translateY(0) rotate(-1deg); }
+      50%       { transform: translateY(-5px) rotate(1deg); }
+    }
+
+    /* ── Knob hit area ── */
+    .knob-hitarea {
+      position: absolute;
+      bottom: 68px; right: 46px;
+      width: 54px; height: 54px;
+      border-radius: 50%;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      z-index: 10;
+      background: #f0e0a0;
+      border: 2.5px solid #3d2f2f;
+      box-shadow: 3px 3px 0 #b8a060;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .knob-hitarea::before {
+      content: '';
+      position: absolute;
+      top: 6px; left: 50%; transform: translateX(-50%);
+      width: 5px; height: 17px;
+      background: #b8a060;
+      border-radius: 3px;
+    }
+    .knob-hitarea::after {
+      content: '';
+      position: absolute;
+      top: 9px; left: 8px;
+      width: 14px; height: 9px;
+      background: rgba(255,255,255,0.38);
+      border-radius: 50%;
+      transform: rotate(-20deg);
+    }
+    .knob-hitarea:focus-visible { outline: 2px dashed var(--rose-dark); outline-offset: 3px; }
+    .knob-hitarea.disabled { cursor: default; pointer-events: none; opacity: 0.6; }
+    .knob-hitarea.spinning {
+      animation: knob-spin 0.9s cubic-bezier(0.4, 0, 0.25, 1) forwards;
+    }
+    @keyframes knob-spin {
+      0%   { transform: rotate(0deg); }
+      18%  { transform: rotate(165deg); }
+      50%  { transform: rotate(300deg); }
+      72%  { transform: rotate(345deg); }
+      86%  { transform: rotate(356deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* ── Rolling ball ── */
+    #rolling-ball {
+      position: absolute;
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      outline: 2.5px solid rgba(60,40,40,0.2);
+      display: none;
+      z-index: 20;
+    }
+    #rolling-ball::before {
+      content: '';
+      position: absolute;
+      top: 6px; left: 9px;
+      width: 11px; height: 7px;
+      background: rgba(255,255,255,0.5);
+      border-radius: 50%;
+      transform: rotate(-20deg);
+    }
+    #rolling-ball .rb-seam-h {
+      position: absolute; top: 50%; left: 5%; right: 5%; height: 2px;
+      background: rgba(60,40,40,0.12); transform: translateY(-50%); border-radius: 1px;
+    }
+    #rolling-ball .rb-seam-v {
+      position: absolute; left: 50%; top: 5%; bottom: 5%; width: 2px;
+      background: rgba(60,40,40,0.12); transform: translateX(-50%); border-radius: 1px;
+    }
+
+    .tray-wrap { position: relative; margin-top: -2px; }
+
+    /* ── Idle hint ── */
+    .idle-hint {
+      font-size: 17px; color: var(--ink-soft);
+      text-align: center; transform: rotate(-0.5deg);
+    }
+
+    /* ── Footer ── */
+    .footer {
+      font-size: 15px; color: var(--ink-soft);
+      text-align: center; transform: rotate(-0.3deg);
+      display: inline-block;
+    }
+
+    /* ══════════════════════════════
+       MODAL
+    ══════════════════════════════ */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(61,47,47,0.35);
+      z-index: 200; align-items: center;
+      justify-content: center; padding: 24px;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      position: relative;
+      background: #fffdf7;
+      border: 2.5px solid var(--ink);
+      border-radius: 6px 18px 8px 14px / 14px 6px 18px 8px;
+      padding: 36px 28px 28px;
+      max-width: 340px; width: 100%;
+      text-align: center;
+      box-shadow: 5px 6px 0 rgba(60,40,40,0.13);
+      animation: modal-pop 0.4s cubic-bezier(0.18,0.89,0.32,1.28) both;
+    }
+    .modal::before {
+      content: ''; position: absolute;
+      top: -12px; left: 50%;
+      transform: translateX(-50%) rotate(-1.5deg);
+      width: 52px; height: 18px;
+      background: rgba(240,224,160,0.75);
+      border-radius: 2px; border: 1px solid rgba(180,160,80,0.3);
+    }
+    @keyframes modal-pop {
+      0%   { opacity: 0; transform: scale(0.7) rotate(-3deg); }
+      100% { opacity: 1; transform: scale(1) rotate(-0.5deg); }
+    }
+
+    .modal-ball {
+      width: 80px; height: 80px; border-radius: 50%;
+      margin: 0 auto 18px; position: relative;
+      box-shadow: 3px 3px 0 rgba(60,40,40,0.15), 0 0 0 3px rgba(60,40,40,0.1);
+      animation: drop-in 0.45s cubic-bezier(0.18,0.89,0.32,1.28) 0.05s both;
+    }
+    .modal-ball::before {
+      content: ''; position: absolute;
+      top: 11px; left: 15px;
+      width: 20px; height: 12px;
+      background: rgba(255,255,255,0.5); border-radius: 50%;
+      transform: rotate(-20deg);
+    }
+    .modal-ball .seam-h {
+      position: absolute; top: 50%; left: 5%; right: 5%; height: 2px;
+      background: rgba(60,40,40,0.1); transform: translateY(-50%); border-radius: 1px;
+    }
+    .modal-ball .seam-v {
+      position: absolute; left: 50%; top: 5%; bottom: 5%; width: 2px;
+      background: rgba(60,40,40,0.1); transform: translateX(-50%); border-radius: 1px;
+    }
+    @keyframes drop-in {
+      0%   { opacity: 0; transform: translateY(-30px) scale(0.5) rotate(-8deg); }
+      100% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
+    }
+
+    .modal-message {
+      font-family: 'Caveat', cursive;
+      font-size: 20px; font-weight: 600;
+      color: var(--ink); line-height: 1.45;
+      animation: fade-up 0.3s ease 0.28s both;
+    }
+    @keyframes fade-up {
+      0%   { opacity: 0; transform: translateY(8px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-close {
+      margin-top: 22px; display: inline-block;
+      font-family: 'Caveat', cursive;
+      font-size: 17px; font-weight: 700; color: var(--ink);
+      background: var(--butter);
+      border: 2px solid var(--ink);
+      border-radius: 3px 10px 4px 8px / 8px 3px 10px 4px;
+      padding: 6px 24px; cursor: pointer;
+      box-shadow: 3px 3px 0 rgba(60,40,40,0.15);
+      transition: transform 0.1s, box-shadow 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .modal-close:hover  { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 rgba(60,40,40,0.15); }
+    .modal-close:active { transform: translate(2px,2px);   box-shadow: 1px 1px 0 rgba(60,40,40,0.15); }
+
+    /* ══════════════════════════════
+       HEART BALLOON CELEBRATION
+    ══════════════════════════════ */
+    #balloon-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 998; /* below modal (200 stacking context) but above page */
+    }
+
+    /* Glow pulse on the final modal */
+    .modal-overlay.final .modal {
+      animation: modal-pop 0.4s cubic-bezier(0.18,0.89,0.32,1.28) both,
+                 final-glow 2s ease-in-out 0.5s infinite alternate;
+      border-color: #e8b4bc;
+    }
+    @keyframes final-glow {
+      0%   { box-shadow: 5px 6px 0 rgba(60,40,40,0.13), 0 0 0   rgba(232,180,188,0); }
+      100% { box-shadow: 5px 6px 0 rgba(60,40,40,0.13), 0 0 28px rgba(232,180,188,0.55); }
+    }
+    /* washi tape turns pink on final */
+    .modal-overlay.final .modal::before {
+      background: rgba(245,191,196,0.8);
+    }
+
+    @media (max-width: 320px) {
+      .machine-svg-wrap { width: 230px; }
+      .knob-hitarea { right: 36px; bottom: 58px; width: 46px; height: 46px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .mini-ball, .modal-ball, .modal { animation: none !important; }
+      .globe-balls.shaking { animation: none !important; }
+      .knob-hitarea.spinning { animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Wobble filter -->
+<svg class="svg-filters" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="wobble" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="3" result="noise" seed="2"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+</svg>
+
+<!-- Background doodles -->
+<div class="bg-doodle" aria-hidden="true">
+  <svg viewBox="0 0 800 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <g fill="none" stroke="rgba(180,144,160,0.22)" stroke-width="1.5" stroke-linecap="round">
+      <line x1="60"  y1="80"  x2="60"  y2="92" /><line x1="54"  y1="86"  x2="66"  y2="86" />
+      <line x1="720" y1="140" x2="720" y2="152"/><line x1="714" y1="146" x2="726" y2="146"/>
+      <line x1="40"  y1="400" x2="40"  y2="412"/><line x1="34"  y1="406" x2="46"  y2="406"/>
+      <line x1="760" y1="500" x2="760" y2="512"/><line x1="754" y1="506" x2="766" y2="506"/>
+      <line x1="100" y1="750" x2="100" y2="762"/><line x1="94"  y1="756" x2="106" y2="756"/>
+      <line x1="680" y1="820" x2="680" y2="832"/><line x1="674" y1="826" x2="686" y2="826"/>
+    </g>
+    <g fill="none" stroke-width="1.5">
+      <circle cx="120" cy="200" r="8"  stroke="rgba(180,160,200,0.2)"/>
+      <circle cx="700" cy="300" r="6"  stroke="rgba(200,170,170,0.2)"/>
+      <circle cx="50"  cy="600" r="10" stroke="rgba(160,200,180,0.2)"/>
+      <circle cx="750" cy="680" r="7"  stroke="rgba(200,200,160,0.2)"/>
+      <circle cx="400" cy="50"  r="9"  stroke="rgba(180,200,220,0.2)"/>
+      <circle cx="200" cy="850" r="8"  stroke="rgba(200,170,170,0.2)"/>
+    </g>
+    <g fill="none" stroke="rgba(180,160,140,0.1)" stroke-width="1.2">
+      <path d="M0 250 Q100 240 200 255 Q300 268 400 252 Q500 238 600 255 Q700 268 800 252"/>
+      <path d="M0 650 Q100 640 200 655 Q300 668 400 650 Q500 635 600 652 Q700 666 800 650"/>
+    </g>
+  </svg>
+</div>
+
+<!-- Heart balloon canvas (hidden until final message) -->
+<canvas id="balloon-canvas" style="display:none"></canvas>
+
+<!-- ── Header ── -->
+<header class="header">
+  <div class="header-deco">🎂 ✨ 🎈</div>
+  <h1 class="header-title">Happy Birthday Baby!</h1>
+  <br>
+  <p class="header-sub">turn the yellow knob for a little surprise~</p>
+</header>
+
+<!-- ── Machine stage ── -->
+<div class="machine-stage" id="machine-stage">
+  <div class="machine-svg-wrap" id="machine-svg-wrap">
+
+    <svg id="machine-svg" viewBox="0 0 270 390" xmlns="http://www.w3.org/2000/svg"
+         style="filter:url(#wobble)" aria-hidden="true">
+
+      <!-- Top cap -->
+      <rect x="14" y="10" width="242" height="34" rx="14"
+            fill="#d4909a" stroke="#3d2f2f" stroke-width="2.2" stroke-linejoin="round"/>
+      <circle cx="52"  cy="27" r="6" fill="#f0e0a0" stroke="#3d2f2f" stroke-width="1.6"/>
+      <circle cx="72"  cy="27" r="6" fill="#fdf8f0" stroke="#3d2f2f" stroke-width="1.6" opacity="0.7"/>
+      <text x="135" y="32" text-anchor="middle"
+            font-family="Caveat, cursive" font-size="13" font-weight="700"
+            fill="rgba(253,248,240,0.88)" letter-spacing="3">GACHA</text>
+      <circle cx="198" cy="27" r="6" fill="rgba(253,248,240,0.6)" stroke="#3d2f2f" stroke-width="1.6"/>
+      <circle cx="218" cy="27" r="6" fill="#c9c0e0" stroke="#3d2f2f" stroke-width="1.6"/>
+
+      <!-- Globe shell -->
+      <rect x="14" y="44" width="242" height="188" rx="0"
+            fill="#e8b4bc" stroke="#3d2f2f" stroke-width="2.2"/>
+      <circle cx="135" cy="138" r="96"
+              fill="rgba(253,248,240,0.52)" stroke="#3d2f2f" stroke-width="2.5"/>
+      <ellipse cx="108" cy="102" rx="22" ry="13"
+               fill="rgba(255,255,255,0.38)" transform="rotate(-20,108,102)"/>
+
+      <!-- Balls inside globe via foreignObject -->
+      <foreignObject x="50" y="53" width="170" height="170">
+        <div xmlns="http://www.w3.org/1999/xhtml" class="globe-balls" id="globe-balls">
+          <div class="mini-ball" style="background:#f5bfc4"></div>
+          <br>
+          <div class="mini-ball" style="background:#b8d4e8"></div>
+          <div class="mini-ball" style="background:#c9c0e0"></div>
+          <br>
+          <div class="mini-ball" style="background:#f0e0a0"></div>
+          <br>
+          <div class="mini-ball" style="background:#b4d8c8"></div>
+          <br>
+          <div class="mini-ball" style="background:#f2c9a8"></div>
+          <br>
+          <div class="mini-ball" style="background:#d4c4e8"></div>
+          <br>
+          <div class="mini-ball" style="background:#a8d4c0"></div>
+          <br>
+          <div class="mini-ball" style="background:#f0c8d0"></div>
+        </div>
+      </foreignObject>
+
+      <!-- Neck -->
+      <rect x="14" y="232" width="242" height="22" rx="0"
+            fill="#c87880" stroke="#3d2f2f" stroke-width="2.2"/>
+      <rect x="103" y="239" width="64" height="7" rx="3" fill="rgba(30,20,20,0.22)"/>
+
+      <!-- Body -->
+      <rect x="14" y="254" width="242" height="100" rx="0"
+            fill="#e8b4bc" stroke="#3d2f2f" stroke-width="2.2"/>
+
+      <!-- Coin slot -->
+      <rect x="38" y="270" width="48" height="66" rx="8"
+            fill="#d4909a" stroke="#3d2f2f" stroke-width="2"/>
+      <rect x="50" y="285" width="24" height="5" rx="2.5" fill="rgba(30,20,20,0.28)"/>
+      <rect x="50" y="297" width="24" height="5" rx="2.5" fill="rgba(30,20,20,0.28)"/>
+      <text x="62" y="325" text-anchor="middle"
+            font-family="Caveat, cursive" font-size="10" font-weight="600"
+            fill="rgba(253,248,240,0.7)">¥100</text>
+
+      <!-- Knob stem; visual circle rendered by .knob-hitarea CSS div on top -->
+      <g id="knob-group">
+        <rect x="164" y="280" width="8" height="18" rx="3"
+              fill="#c87880" stroke="#3d2f2f" stroke-width="1.5"/>
+      </g>
+      <text x="168" y="360" text-anchor="middle"
+            font-family="Caveat, cursive" font-size="11" font-weight="600"
+            fill="rgba(253,248,240,0.75)" letter-spacing="2">TURN</text>
+
+      <!-- Base -->
+      <rect x="14" y="354" width="242" height="30" rx="0 0 14 14"
+            fill="#c87880" stroke="#3d2f2f" stroke-width="2.2"/>
+      <rect x="103" y="354" width="64" height="22" rx="0 0 9 9"
+            fill="rgba(30,20,20,0.22)"/>
+    </svg>
+
+    <!-- Knob hit area -->
+    <div class="knob-hitarea" id="knob"
+         onclick="turnKnob()" role="button"
+         tabindex="0" aria-label="Turn the gachapon knob"></div>
+
+    <!-- Rolling ball -->
+    <div id="rolling-ball">
+      <div class="rb-seam-h"></div>
+      <div class="rb-seam-v"></div>
+    </div>
+  </div>
+
+  <!-- Tray -->
+  <div class="tray-wrap">
+    <svg viewBox="0 0 130 38" width="130" height="38"
+         style="filter:url(#wobble)" aria-hidden="true">
+      <rect x="2" y="0" width="126" height="38" rx="0 0 12 12"
+            fill="#c87880" stroke="#3d2f2f" stroke-width="2.2"/>
+      <rect x="43" y="0" width="44" height="22" rx="0 0 12 12"
+            fill="rgba(30,20,20,0.24)"/>
+    </svg>
+  </div>
+</div>
+
+<p class="idle-hint" id="idle-hint">🎀 open message 1 of <span id="total-count"></span>~</p>
+<footer class="footer">made by timmy 💖 for sanny</footer>
+
+<!-- ── Modal ── -->
+<div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-message">
+  <div class="modal">
+    <div class="modal-ball" id="modal-ball">
+      <div class="seam-h"></div>
+      <div class="seam-v"></div>
+    </div>
+    <p class="modal-message" id="modal-message"></p>
+    <button class="modal-close" onclick="closeModal()">close ✿</button>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════
+     CUSTOMIZE YOUR MESSAGES HERE!
+     Replace any line below with your
+     own birthday messages.
+     ════════════════════════════════ -->
+<script>
+  const MESSAGES = [
+    "The day is finally here! Yay!",
+    "I wish I could be with you in person and give you the the warmest hug 🌟",
+    "Thank you for being such an amazing girlfriend! ✨",
+    "Eventhough we're apart, I want you to know how much I love you! 🎉",
+    "I wish you happiness and joy every day! 💖",
+    "To my beautiful girlfriend 🌈",
+    "My bestfriend, my wifey, my love 🎊",
+    "from the bottom of my heart 🎀",
+    "Sending you the biggest birthday hug! 🤗",
+    "Happy Birthday! I love you so much   💖"
+  ];
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  const BALL_COLORS = [
+    '#f5bfc4','#b8d4e8','#c9c0e0','#f0e0a0',
+    '#b4d8c8','#f2c9a8','#d4c4e8','#a8d4c0',
+    '#f0c8d0','#d0e4b8','#e8d4b0','#c4d8f0'
+  ];
+
+  let busy = false;
+  let msgIndex = 0;
+
+  document.getElementById('total-count').textContent = MESSAGES.length;
+
+  function nextMessage() {
+    const i = Math.min(msgIndex, MESSAGES.length - 1);
+    msgIndex++;
+    return MESSAGES[i];
+  }
+
+  /* ─────────────────────────────────────
+     SEQUENCE
+     0–920ms   : knob spins + balls shuffle
+     920ms+    : ball slides out → modal pops
+  ───────────────────────────────────── */
+  function turnKnob() {
+    if (busy) return;
+    busy = true;
+
+    const isFinal    = (msgIndex === MESSAGES.length - 1); // last message about to show
+    const color      = BALL_COLORS[Math.floor(Math.random() * BALL_COLORS.length)];
+    const msg        = nextMessage();
+    const knobHit    = document.getElementById('knob');
+    const globeBalls = document.getElementById('globe-balls');
+    const rb         = document.getElementById('rolling-ball');
+    const machineEl  = document.getElementById('machine-svg-wrap');
+
+    knobHit.classList.add('disabled');
+
+    /* STAGE 1 — knob spins + balls shuffle */
+    knobHit.classList.add('spinning');
+    globeBalls.classList.add('shaking');
+
+    setTimeout(() => {
+      knobHit.classList.remove('spinning');
+      globeBalls.classList.remove('shaking');
+
+      /* STAGE 2 — ball slides out */
+      rb.style.background = color;
+      rb.style.display    = 'block';
+
+      const svgEl    = document.getElementById('machine-svg');
+      const svgRect  = svgEl.getBoundingClientRect();
+      const scaleX   = svgRect.width  / 270;
+      const scaleY   = svgRect.height / 390;
+
+      const chuteX   = 135 * scaleX;
+      const chuteY   = 370 * scaleY;
+
+      const stageRect   = document.getElementById('machine-stage').getBoundingClientRect();
+      const wrapRect    = machineEl.getBoundingClientRect();
+      const wrapLeft    = wrapRect.left - stageRect.left;
+      const wrapTop     = wrapRect.top  - stageRect.top;
+
+      const trayWrap    = document.querySelector('.tray-wrap');
+      const trayRect    = trayWrap.getBoundingClientRect();
+      const trayTop     = trayRect.top  - stageRect.top + 4;
+      const trayCentreX = trayRect.left + trayRect.width / 2 - stageRect.left;
+
+      rb.style.transition = 'none';
+      rb.style.opacity    = '0';
+      rb.style.transform  = 'scale(0.5)';
+      rb.style.left       = (wrapLeft + chuteX - 17) + 'px';
+      rb.style.top        = (wrapTop  + chuteY - 17) + 'px';
+
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        rb.style.transition = 'opacity 0.12s ease, transform 0.12s ease';
+        rb.style.opacity    = '1';
+        rb.style.transform  = 'scale(1)';
+      }));
+
+      setTimeout(() => {
+        rb.style.transition = 'left 0.38s cubic-bezier(0.25,0.46,0.45,0.94), top 0.3s cubic-bezier(0.25,0.46,0.45,0.94)';
+        rb.style.left = (trayCentreX - 17) + 'px';
+        rb.style.top  = trayTop + 'px';
+      }, 150);
+
+      setTimeout(() => {
+        rb.style.transition = 'transform 0.1s ease-out';
+        rb.style.transform  = 'scale(1.08, 0.93)';
+      }, 510);
+      setTimeout(() => {
+        rb.style.transition = 'transform 0.08s ease-in';
+        rb.style.transform  = 'scale(1)';
+      }, 620);
+
+      /* STAGE 3 — modal pops (+ balloons if final) */
+      setTimeout(() => {
+        rb.style.display = 'none';
+
+        document.getElementById('modal-ball').style.background = color;
+        document.getElementById('modal-message').textContent   = msg;
+
+        const overlay = document.getElementById('modal-overlay');
+        if (isFinal) {
+          overlay.classList.add('final');
+          launchBalloons();
+        }
+        overlay.classList.add('open');
+        overlay.addEventListener('click', onBackdropClick);
+      }, 780);
+
+    }, 920);
+  }
+
+  document.getElementById('knob').addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); turnKnob(); }
+  });
+
+  function closeModal() {
+    const overlay = document.getElementById('modal-overlay');
+    overlay.classList.remove('open');
+    overlay.classList.remove('final');
+    overlay.removeEventListener('click', onBackdropClick);
+    stopBalloons();
+    busy = false;
+
+    if (msgIndex >= MESSAGES.length) {
+      document.getElementById('knob').classList.add('disabled');
+      document.getElementById('idle-hint').textContent = '🎀 that\'s all the messages! 我愛你~';
+    } else {
+      document.getElementById('knob').classList.remove('disabled');
+      document.getElementById('idle-hint').textContent =
+        `turn again for message ${msgIndex + 1} of ${MESSAGES.length} ~`;
+    }
+  }
+
+  function onBackdropClick(e) {
+    if (e.target === document.getElementById('modal-overlay')) closeModal();
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+  });
+
+
+  /* ══════════════════════════════════════════
+     HEART BALLOON CELEBRATION
+     Draws hand-drawn-style hearts that float
+     up from the bottom of the screen.
+  ══════════════════════════════════════════ */
+  const balloonCanvas = document.getElementById('balloon-canvas');
+  const bCtx = balloonCanvas.getContext('2d');
+  let balloonAnimId = null;
+  let balloons = [];
+
+  // Pastel heart colours to match the page palette
+  const HEART_COLORS = [
+    '#f5bfc4', // rose
+    '#c9c0e0', // lavender
+    '#f0e0a0', // butter
+    '#b4d8c8', // mint
+    '#f2c9a8', // peach
+    '#b8d4e8', // sky
+    '#f0c8d0', // blush
+    '#d4c4e8', // lilac
+  ];
+
+  function resizeBalloonCanvas() {
+    balloonCanvas.width  = window.innerWidth;
+    balloonCanvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeBalloonCanvas);
+
+  function makeBalloon() {
+    const size  = 28 + Math.random() * 28;       // 28–56px
+    const sway  = (Math.random() - 0.5) * 1.2;   // gentle side drift
+    const speed = 1.2 + Math.random() * 1.4;      // px per frame
+    const wobbleFreq  = 0.03 + Math.random() * 0.03;
+    const wobblePhase = Math.random() * Math.PI * 2;
+    return {
+      x:     Math.random() * balloonCanvas.width,
+      y:     balloonCanvas.height + size + 10,   // start below screen
+      size,
+      color: HEART_COLORS[Math.floor(Math.random() * HEART_COLORS.length)],
+      sway,
+      speed,
+      wobbleFreq,
+      wobblePhase,
+      age:   0,
+      opacity: 0,
+    };
+  }
+
+  // Draw a hand-drawn-style heart at (cx, cy) with given size
+  function drawHeart(ctx, cx, cy, size, color, opacity) {
+    ctx.save();
+    ctx.globalAlpha = opacity;
+
+    const s = size * 0.5; // half-size scale
+
+    ctx.beginPath();
+    // Classic heart via bezier curves, centred at (cx, cy)
+    ctx.moveTo(cx, cy + s * 0.35);
+    ctx.bezierCurveTo(cx, cy,           cx - s, cy - s * 0.5, cx - s, cy - s * 0.1);
+    ctx.bezierCurveTo(cx - s, cy - s * 0.8, cx, cy - s * 0.9, cx, cy - s * 0.4);
+    ctx.bezierCurveTo(cx, cy - s * 0.9, cx + s, cy - s * 0.8, cx + s, cy - s * 0.1);
+    ctx.bezierCurveTo(cx + s, cy - s * 0.5, cx, cy,           cx, cy + s * 0.35);
+    ctx.closePath();
+
+    ctx.fillStyle   = color;
+    ctx.fill();
+
+    // Slightly wobbly ink outline — hand-drawn feel
+    ctx.strokeStyle = 'rgba(61,47,47,0.22)';
+    ctx.lineWidth   = 1.6;
+    ctx.stroke();
+
+    // Little shine spot
+    ctx.beginPath();
+    ctx.ellipse(cx - s * 0.28, cy - s * 0.42, s * 0.18, s * 0.12, -0.5, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,0.45)';
+    ctx.fill();
+
+    // String — a gentle wavy line downward
+    ctx.beginPath();
+    ctx.moveTo(cx, cy + s * 0.35);
+    ctx.quadraticCurveTo(cx + s * 0.3, cy + s * 0.8, cx, cy + s * 1.6);
+    ctx.strokeStyle = 'rgba(61,47,47,0.18)';
+    ctx.lineWidth   = 1.2;
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  let spawnTimer = 0;
+  const SPAWN_INTERVAL = 18; // frames between new balloons
+
+  function tickBalloons() {
+    bCtx.clearRect(0, 0, balloonCanvas.width, balloonCanvas.height);
+
+    // Spawn new balloon every N frames
+    spawnTimer++;
+    if (spawnTimer >= SPAWN_INTERVAL) {
+      spawnTimer = 0;
+      balloons.push(makeBalloon());
+    }
+
+    balloons = balloons.filter(b => b.y > -b.size * 2);
+
+    for (const b of balloons) {
+      b.age++;
+      b.y -= b.speed;
+      b.x += b.sway + Math.sin(b.age * b.wobbleFreq + b.wobblePhase) * 0.6;
+
+      // Fade in over first 30 frames, fade out near top
+      const fadeIn  = Math.min(1, b.age / 30);
+      const fadeOut = Math.min(1, Math.max(0, (b.y) / (balloonCanvas.height * 0.2)));
+      b.opacity = fadeIn * fadeOut;
+
+      drawHeart(bCtx, b.x, b.y, b.size, b.color, b.opacity);
+    }
+
+    balloonAnimId = requestAnimationFrame(tickBalloons);
+  }
+
+  function launchBalloons() {
+    resizeBalloonCanvas();
+    balloonCanvas.style.display = 'block';
+    balloons    = [];
+    spawnTimer  = 0;
+    // Pre-populate a few so screen isn't empty at start
+    for (let i = 0; i < 8; i++) {
+      const b = makeBalloon();
+      b.y = balloonCanvas.height * (0.3 + Math.random() * 0.7);
+      balloons.push(b);
+    }
+    if (balloonAnimId) cancelAnimationFrame(balloonAnimId);
+    tickBalloons();
+  }
+
+  function stopBalloons() {
+    if (balloonAnimId) {
+      cancelAnimationFrame(balloonAnimId);
+      balloonAnimId = null;
+    }
+    bCtx.clearRect(0, 0, balloonCanvas.width, balloonCanvas.height);
+    balloonCanvas.style.display = 'none';
+    balloons = [];
+  }
+</script>
+</body>
+</html>
