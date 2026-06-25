@@ -68,11 +68,25 @@
       align-items: center;
     }
 
+    /* Machine shake animation */
     .machine-svg-wrap {
       position: relative;
       width: 270px;
     }
     .machine-svg-wrap > svg { width: 100%; height: auto; overflow: visible; }
+
+    @keyframes machine-shake {
+      0%,100% { transform: translate(0, 0) rotate(0deg); }
+      10%     { transform: translate(-3px, 1px) rotate(-0.8deg); }
+      20%     { transform: translate(3px, -2px) rotate(0.8deg); }
+      30%     { transform: translate(-4px, 2px) rotate(-1deg); }
+      40%     { transform: translate(4px, -1px) rotate(1deg); }
+      50%     { transform: translate(-3px, 2px) rotate(-0.6deg); }
+      60%     { transform: translate(3px, -2px) rotate(0.6deg); }
+      70%     { transform: translate(-2px, 1px) rotate(-0.4deg); }
+      80%     { transform: translate(2px, -1px) rotate(0.4deg); }
+      90%     { transform: translate(-1px, 0px) rotate(-0.2deg); }
+    }
 
     /* Globe balls */
     .globe-balls {
@@ -81,35 +95,12 @@
       gap: 6px; padding: 16px;
       width: 170px; height: 170px;
     }
-    .globe-balls.shaking { animation: globe-shake 0.7s ease-in-out; }
-
-    @keyframes globe-shake {
-      0%   { transform: translate(0,0) rotate(0deg); }
-      12%  { transform: translate(-5px, 4px) rotate(-3deg); }
-      25%  { transform: translate(6px,-4px) rotate(3deg); }
-      38%  { transform: translate(-4px, 5px) rotate(-2deg); }
-      52%  { transform: translate(5px,-3px) rotate(2deg); }
-      65%  { transform: translate(-3px, 3px) rotate(-1deg); }
-      78%  { transform: translate(2px,-2px) rotate(0.5deg); }
-      100% { transform: translate(0,0) rotate(0deg); }
-    }
 
     .mini-ball {
       width: 26px; height: 26px; border-radius: 50%;
       position: relative; flex-shrink: 0;
       animation: bob 2.4s ease-in-out infinite;
       outline: 2px solid rgba(60,40,40,0.18);
-    }
-    .globe-balls.shaking .mini-ball { animation: ball-shuffle 0.7s ease-in-out infinite; }
-    .globe-balls.shaking .mini-ball:nth-child(odd)  { animation-delay: 0s; }
-    .globe-balls.shaking .mini-ball:nth-child(even) { animation-delay: 0.12s; }
-
-    @keyframes ball-shuffle {
-      0%,100% { transform: translate(0,0) rotate(0deg); }
-      20%      { transform: translate(-3px,-4px) rotate(-5deg); }
-      40%      { transform: translate(4px, 3px) rotate(4deg); }
-      60%      { transform: translate(-2px, 4px) rotate(-3deg); }
-      80%      { transform: translate(3px,-2px) rotate(3deg); }
     }
 
     .mini-ball::after {
@@ -145,6 +136,7 @@
       border: 2.5px solid #3d2f2f;
       box-shadow: 3px 3px 0 #b8a060;
       display: flex; align-items: center; justify-content: center;
+      transition: box-shadow 0.1s, transform 0.1s;
     }
     .knob-hitarea::before {
       content: '';
@@ -165,16 +157,36 @@
     }
     .knob-hitarea:focus-visible { outline: 2px dashed var(--rose-dark); outline-offset: 3px; }
     .knob-hitarea.disabled { cursor: default; pointer-events: none; opacity: 0.6; }
-    .knob-hitarea.spinning {
-      animation: knob-spin 0.9s cubic-bezier(0.4, 0, 0.25, 1) forwards;
+
+    @keyframes knob-press {
+      0%   { transform: translate(0,0) scale(1);         box-shadow: 3px 3px 0 #b8a060; }
+      50%  { transform: translate(2px,2px) scale(0.93);  box-shadow: 1px 1px 0 #b8a060; }
+      100% { transform: translate(2px,2px) scale(0.93);  box-shadow: 1px 1px 0 #b8a060; }
     }
     @keyframes knob-spin {
-      0%   { transform: rotate(0deg); }
-      18%  { transform: rotate(165deg); }
-      50%  { transform: rotate(300deg); }
-      72%  { transform: rotate(345deg); }
-      86%  { transform: rotate(356deg); }
-      100% { transform: rotate(360deg); }
+      0%   { transform: translate(2px,2px) scale(0.93) rotate(0deg);   box-shadow: 1px 1px 0 #b8a060; }
+      15%  { transform: rotate(150deg);  box-shadow: 3px 3px 0 #b8a060; }
+      50%  { transform: rotate(290deg); }
+      72%  { transform: rotate(342deg); }
+      88%  { transform: rotate(357deg); }
+      100% { transform: rotate(360deg); box-shadow: 3px 3px 0 #b8a060; }
+    }
+    @keyframes globe-shake-anim {
+      0%   { transform: translate(0,0) rotate(0deg); }
+      12%  { transform: translate(-5px, 4px) rotate(-3deg); }
+      25%  { transform: translate(6px,-4px) rotate(3deg); }
+      38%  { transform: translate(-4px, 5px) rotate(-2deg); }
+      52%  { transform: translate(5px,-3px) rotate(2deg); }
+      65%  { transform: translate(-3px, 3px) rotate(-1deg); }
+      78%  { transform: translate(2px,-2px) rotate(0.5deg); }
+      100% { transform: translate(0,0) rotate(0deg); }
+    }
+    @keyframes ball-shuffle-anim {
+      0%,100% { transform: translate(0,0) rotate(0deg); }
+      20%     { transform: translate(-3px,-4px) rotate(-5deg); }
+      40%     { transform: translate(4px, 3px) rotate(4deg); }
+      60%     { transform: translate(-2px, 4px) rotate(-3deg); }
+      80%     { transform: translate(3px,-2px) rotate(3deg); }
     }
 
     /* ── Rolling ball ── */
@@ -219,9 +231,9 @@
       display: inline-block;
     }
 
-    /* ══════════════════════════════
-       MODAL
-    ══════════════════════════════ */
+    /* ══════════════════════════════════════
+       MODAL — SCROLL UNROLL EFFECT
+    ══════════════════════════════════════ */
     .modal-overlay {
       display: none; position: fixed; inset: 0;
       background: rgba(61,47,47,0.35);
@@ -230,35 +242,77 @@
     }
     .modal-overlay.open { display: flex; }
 
+    /* Scroll container clips the unrolling content */
+    .modal-scroll-wrap {
+      position: relative;
+      max-width: 340px; width: 100%;
+      /* clip so content reveals from top down */
+      overflow: hidden;
+      /* starts at 0 height, expands to natural height */
+      animation: scroll-unroll 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    @keyframes scroll-unroll {
+      0%   { max-height: 0px;  opacity: 0.4; transform: scaleY(0.05) translateY(-20px); transform-origin: top center; }
+      40%  { opacity: 1; }
+      100% { max-height: 600px; transform: scaleY(1) translateY(0);  transform-origin: top center; }
+    }
+
+    /* The scroll rod at the top */
+    .scroll-rod-top, .scroll-rod-bottom {
+      width: 100%;
+      height: 18px;
+      background: linear-gradient(to bottom, #d4a880, #c09060);
+      border-radius: 9px;
+      border: 1.8px solid #3d2f2f;
+      box-shadow: 0 2px 4px rgba(60,40,40,0.18), inset 0 1px 0 rgba(255,255,255,0.25);
+      position: relative;
+      z-index: 2;
+    }
+    /* knobs on each end of the rod */
+    .scroll-rod-top::before, .scroll-rod-top::after,
+    .scroll-rod-bottom::before, .scroll-rod-bottom::after {
+      content: '';
+      position: absolute;
+      top: 50%; transform: translateY(-50%);
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: #c09060;
+      border: 1.8px solid #3d2f2f;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.3);
+    }
+    .scroll-rod-top::before, .scroll-rod-bottom::before { left: -4px; }
+    .scroll-rod-top::after,  .scroll-rod-bottom::after  { right: -4px; }
+
+    /* Paper body of the scroll */
     .modal {
       position: relative;
       background: #fffdf7;
-      border: 2.5px solid var(--ink);
-      border-radius: 6px 18px 8px 14px / 14px 6px 18px 8px;
-      padding: 36px 28px 28px;
-      max-width: 340px; width: 100%;
+      border-left: 2px solid #3d2f2f;
+      border-right: 2px solid #3d2f2f;
+      padding: 22px 28px 22px;
       text-align: center;
-      box-shadow: 5px 6px 0 rgba(60,40,40,0.13);
-      animation: modal-pop 0.4s cubic-bezier(0.18,0.89,0.32,1.28) both;
+      box-shadow: inset 0 0 40px rgba(180,160,130,0.08);
     }
+    /* subtle paper lines inside */
     .modal::before {
-      content: ''; position: absolute;
-      top: -12px; left: 50%;
-      transform: translateX(-50%) rotate(-1.5deg);
-      width: 52px; height: 18px;
-      background: rgba(240,224,160,0.75);
-      border-radius: 2px; border: 1px solid rgba(180,160,80,0.3);
-    }
-    @keyframes modal-pop {
-      0%   { opacity: 0; transform: scale(0.7) rotate(-3deg); }
-      100% { opacity: 1; transform: scale(1) rotate(-0.5deg); }
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 27px,
+        rgba(180,160,140,0.07) 27px, rgba(180,160,140,0.07) 28px
+      );
+      pointer-events: none;
     }
 
     .modal-ball {
       width: 80px; height: 80px; border-radius: 50%;
       margin: 0 auto 18px; position: relative;
       box-shadow: 3px 3px 0 rgba(60,40,40,0.15), 0 0 0 3px rgba(60,40,40,0.1);
-      animation: drop-in 0.45s cubic-bezier(0.18,0.89,0.32,1.28) 0.05s both;
+      animation: ball-appear 0.4s cubic-bezier(0.18,0.89,0.32,1.28) 0.35s both;
+    }
+    @keyframes ball-appear {
+      0%   { opacity: 0; transform: scale(0.4) rotate(-12deg); }
+      100% { opacity: 1; transform: scale(1) rotate(0deg); }
     }
     .modal-ball::before {
       content: ''; position: absolute;
@@ -275,24 +329,20 @@
       position: absolute; left: 50%; top: 5%; bottom: 5%; width: 2px;
       background: rgba(60,40,40,0.1); transform: translateX(-50%); border-radius: 1px;
     }
-    @keyframes drop-in {
-      0%   { opacity: 0; transform: translateY(-30px) scale(0.5) rotate(-8deg); }
-      100% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
-    }
 
     .modal-message {
       font-family: 'Caveat', cursive;
-      font-size: 20px; font-weight: 600;
-      color: var(--ink); line-height: 1.45;
-      animation: fade-up 0.3s ease 0.28s both;
+      font-size: 21px; font-weight: 600;
+      color: var(--ink); line-height: 1.5;
+      animation: text-appear 0.35s ease 0.55s both;
     }
-    @keyframes fade-up {
-      0%   { opacity: 0; transform: translateY(8px); }
+    @keyframes text-appear {
+      0%   { opacity: 0; transform: translateY(6px); }
       100% { opacity: 1; transform: translateY(0); }
     }
 
     .modal-close {
-      margin-top: 22px; display: inline-block;
+      margin-top: 20px; display: inline-block;
       font-family: 'Caveat', cursive;
       font-size: 17px; font-weight: 700; color: var(--ink);
       background: var(--butter);
@@ -302,34 +352,40 @@
       box-shadow: 3px 3px 0 rgba(60,40,40,0.15);
       transition: transform 0.1s, box-shadow 0.1s;
       -webkit-tap-highlight-color: transparent;
+      animation: text-appear 0.3s ease 0.7s both;
     }
     .modal-close:hover  { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 rgba(60,40,40,0.15); }
     .modal-close:active { transform: translate(2px,2px);   box-shadow: 1px 1px 0 rgba(60,40,40,0.15); }
 
-    /* ══════════════════════════════
-       HEART BALLOON CELEBRATION
-    ══════════════════════════════ */
-    #balloon-canvas {
-      position: fixed;
-      inset: 0;
-      width: 100%; height: 100%;
-      pointer-events: none;
-      z-index: 998; /* below modal (200 stacking context) but above page */
+    /* ── Final message glow ── */
+    .modal-overlay.final .modal-scroll-wrap {
+      filter: drop-shadow(0 0 18px rgba(232,180,188,0.5));
+      animation: scroll-unroll 0.6s cubic-bezier(0.22, 1, 0.36, 1) both,
+                 final-glow-wrap 2s ease-in-out 0.8s infinite alternate;
+    }
+    @keyframes final-glow-wrap {
+      0%   { filter: drop-shadow(0 0 8px  rgba(232,180,188,0.3)); }
+      100% { filter: drop-shadow(0 0 24px rgba(232,180,188,0.7)); }
+    }
+    .modal-overlay.final .scroll-rod-top,
+    .modal-overlay.final .scroll-rod-bottom {
+      background: linear-gradient(to bottom, #e8b4bc, #d4909a);
+      border-color: #b87080;
+    }
+    .modal-overlay.final .scroll-rod-top::before,
+    .modal-overlay.final .scroll-rod-top::after,
+    .modal-overlay.final .scroll-rod-bottom::before,
+    .modal-overlay.final .scroll-rod-bottom::after {
+      background: #d4909a;
+      border-color: #b87080;
     }
 
-    /* Glow pulse on the final modal */
-    .modal-overlay.final .modal {
-      animation: modal-pop 0.4s cubic-bezier(0.18,0.89,0.32,1.28) both,
-                 final-glow 2s ease-in-out 0.5s infinite alternate;
-      border-color: #e8b4bc;
-    }
-    @keyframes final-glow {
-      0%   { box-shadow: 5px 6px 0 rgba(60,40,40,0.13), 0 0 0   rgba(232,180,188,0); }
-      100% { box-shadow: 5px 6px 0 rgba(60,40,40,0.13), 0 0 28px rgba(232,180,188,0.55); }
-    }
-    /* washi tape turns pink on final */
-    .modal-overlay.final .modal::before {
-      background: rgba(245,191,196,0.8);
+    /* ── Heart balloon canvas ── */
+    #balloon-canvas {
+      position: fixed; inset: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 998;
     }
 
     @media (max-width: 320px) {
@@ -337,9 +393,8 @@
       .knob-hitarea { right: 36px; bottom: 58px; width: 46px; height: 46px; }
     }
     @media (prefers-reduced-motion: reduce) {
-      .mini-ball, .modal-ball, .modal { animation: none !important; }
-      .globe-balls.shaking { animation: none !important; }
-      .knob-hitarea.spinning { animation: none !important; }
+      .mini-ball, .modal-ball, .modal-scroll-wrap { animation: none !important; }
+      .knob-hitarea { animation: none !important; }
     }
   </style>
 </head>
@@ -381,7 +436,7 @@
   </svg>
 </div>
 
-<!-- Heart balloon canvas (hidden until final message) -->
+<!-- Heart balloon canvas -->
 <canvas id="balloon-canvas" style="display:none"></canvas>
 
 <!-- ── Header ── -->
@@ -418,7 +473,7 @@
       <ellipse cx="108" cy="102" rx="22" ry="13"
                fill="rgba(255,255,255,0.38)" transform="rotate(-20,108,102)"/>
 
-      <!-- Balls inside globe via foreignObject -->
+      <!-- Balls inside globe -->
       <foreignObject x="50" y="53" width="170" height="170">
         <div xmlns="http://www.w3.org/1999/xhtml" class="globe-balls" id="globe-balls">
           <div class="mini-ball" style="background:#f5bfc4"></div>
@@ -458,7 +513,7 @@
             font-family="Caveat, cursive" font-size="10" font-weight="600"
             fill="rgba(253,248,240,0.7)">¥100</text>
 
-      <!-- Knob stem; visual circle rendered by .knob-hitarea CSS div on top -->
+      <!-- Knob stem -->
       <g id="knob-group">
         <rect x="164" y="280" width="8" height="18" rx="3"
               fill="#c87880" stroke="#3d2f2f" stroke-width="1.5"/>
@@ -501,23 +556,25 @@
 <p class="idle-hint" id="idle-hint">🎀 open message 1 of <span id="total-count"></span>~</p>
 <footer class="footer">made by timmy 💖 for sanny</footer>
 
-<!-- ── Modal ── -->
+<!-- ── Modal — scroll design ── -->
 <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-message">
-  <div class="modal">
-    <div class="modal-ball" id="modal-ball">
-      <div class="seam-h"></div>
-      <div class="seam-v"></div>
+  <div class="modal-scroll-wrap" id="modal-scroll-wrap">
+    <div class="scroll-rod-top"></div>
+    <div class="modal">
+      <div class="modal-ball" id="modal-ball">
+        <div class="seam-h"></div>
+        <div class="seam-v"></div>
+      </div>
+      <p class="modal-message" id="modal-message"></p>
+      <button class="modal-close" onclick="closeModal()">close ✿</button>
     </div>
-    <p class="modal-message" id="modal-message"></p>
-    <button class="modal-close" onclick="closeModal()">close ✿</button>
+    <div class="scroll-rod-bottom"></div>
   </div>
 </div>
 
 
 <!-- ════════════════════════════════
      CUSTOMIZE YOUR MESSAGES HERE!
-     Replace any line below with your
-     own birthday messages.
      ════════════════════════════════ -->
 <script>
   const MESSAGES = [
@@ -551,34 +608,78 @@
     return MESSAGES[i];
   }
 
-  /* ─────────────────────────────────────
+  /* ─────────────────────────────────────────────────
      SEQUENCE
-     0–920ms   : knob spins + balls shuffle
-     920ms+    : ball slides out → modal pops
-  ───────────────────────────────────── */
+     0–180ms  : knob presses down
+     180–920ms: knob spins + machine shakes + balls shuffle
+     920ms+   : ball slides out → scroll unrolls → modal
+  ───────────────────────────────────────────────── */
   function turnKnob() {
+    // If modal open, close it and start the next one
+    const overlayCheck = document.getElementById('modal-overlay');
+    if (overlayCheck.classList.contains('open')) {
+      closeModal();
+      if (msgIndex >= MESSAGES.length) return;
+    }
     if (busy) return;
     busy = true;
 
-    const isFinal    = (msgIndex === MESSAGES.length - 1); // last message about to show
+    const isFinal    = (msgIndex === MESSAGES.length - 1);
     const color      = BALL_COLORS[Math.floor(Math.random() * BALL_COLORS.length)];
     const msg        = nextMessage();
     const knobHit    = document.getElementById('knob');
     const globeBalls = document.getElementById('globe-balls');
+    const machineWrap= document.getElementById('machine-svg-wrap');
     const rb         = document.getElementById('rolling-ball');
     const machineEl  = document.getElementById('machine-svg-wrap');
 
     knobHit.classList.add('disabled');
 
-    /* STAGE 1 — knob spins + balls shuffle */
-    knobHit.classList.add('spinning');
-    globeBalls.classList.add('shaking');
+    /* ── STAGE 1: force-restart all animations via style.animation ── */
 
+    // Helper: strip animation, force reflow, reapply
+    function forceAnim(el, anim) {
+      el.style.animation = 'none';
+      el.offsetHeight; // reflow
+      el.style.animation = anim;
+    }
+
+    // 1a. Knob press-down (0–180ms)
+    forceAnim(knobHit, 'knob-press 0.18s ease-out forwards');
+
+    // 1b. After press settles → full spin (180ms–1070ms)
     setTimeout(() => {
-      knobHit.classList.remove('spinning');
-      globeBalls.classList.remove('shaking');
+      forceAnim(knobHit, 'knob-spin 0.9s cubic-bezier(0.4,0,0.25,1) forwards');
+    }, 180);
 
-      /* STAGE 2 — ball slides out */
+    // 1c. Machine shake (120ms–750ms)
+    setTimeout(() => {
+      forceAnim(machineWrap, 'machine-shake 0.65s cubic-bezier(0.36,0.07,0.19,0.97) both');
+    }, 120);
+
+    // 1d. Globe container shakes
+    setTimeout(() => {
+      forceAnim(globeBalls, 'globe-shake-anim 0.65s ease-in-out both');
+    }, 120);
+
+    // 1e. Each mini-ball shuffles individually
+    const miniBalls = globeBalls.querySelectorAll('.mini-ball');
+    setTimeout(() => {
+      miniBalls.forEach((b, i) => {
+        b.style.animation = 'none';
+        b.offsetHeight;
+        b.style.animation = `ball-shuffle-anim 0.65s ease-in-out ${i % 2 === 0 ? '0s' : '0.1s'} both`;
+      });
+    }, 120);
+
+    // 1f. Clean up all animations after sequence finishes
+    setTimeout(() => {
+      knobHit.style.animation  = '';
+      machineWrap.style.animation = '';
+      globeBalls.style.animation  = '';
+      miniBalls.forEach(b => { b.style.animation = ''; }); // reverts to CSS bob
+
+      /* STAGE 2 — ball slides out of chute */
       rb.style.background = color;
       rb.style.display    = 'block';
 
@@ -627,12 +728,17 @@
         rb.style.transform  = 'scale(1)';
       }, 620);
 
-      /* STAGE 3 — modal pops (+ balloons if final) */
+      /* STAGE 3 — scroll unrolls with the message */
       setTimeout(() => {
         rb.style.display = 'none';
 
         document.getElementById('modal-ball').style.background = color;
         document.getElementById('modal-message').textContent   = msg;
+
+        // Re-trigger the unroll animation by cloning the scroll wrap
+        const wrap = document.getElementById('modal-scroll-wrap');
+        const clone = wrap.cloneNode(true);
+        wrap.parentNode.replaceChild(clone, wrap);
 
         const overlay = document.getElementById('modal-overlay');
         if (isFinal) {
@@ -679,24 +785,15 @@
 
   /* ══════════════════════════════════════════
      HEART BALLOON CELEBRATION
-     Draws hand-drawn-style hearts that float
-     up from the bottom of the screen.
   ══════════════════════════════════════════ */
   const balloonCanvas = document.getElementById('balloon-canvas');
   const bCtx = balloonCanvas.getContext('2d');
   let balloonAnimId = null;
   let balloons = [];
 
-  // Pastel heart colours to match the page palette
   const HEART_COLORS = [
-    '#f5bfc4', // rose
-    '#c9c0e0', // lavender
-    '#f0e0a0', // butter
-    '#b4d8c8', // mint
-    '#f2c9a8', // peach
-    '#b8d4e8', // sky
-    '#f0c8d0', // blush
-    '#d4c4e8', // lilac
+    '#f5bfc4','#c9c0e0','#f0e0a0','#b4d8c8',
+    '#f2c9a8','#b8d4e8','#f0c8d0','#d4c4e8',
   ];
 
   function resizeBalloonCanvas() {
@@ -706,103 +803,66 @@
   window.addEventListener('resize', resizeBalloonCanvas);
 
   function makeBalloon() {
-    const size  = 28 + Math.random() * 28;       // 28–56px
-    const sway  = (Math.random() - 0.5) * 1.2;   // gentle side drift
-    const speed = 1.2 + Math.random() * 1.4;      // px per frame
-    const wobbleFreq  = 0.03 + Math.random() * 0.03;
-    const wobblePhase = Math.random() * Math.PI * 2;
+    const size = 28 + Math.random() * 28;
     return {
-      x:     Math.random() * balloonCanvas.width,
-      y:     balloonCanvas.height + size + 10,   // start below screen
+      x: Math.random() * balloonCanvas.width,
+      y: balloonCanvas.height + size + 10,
       size,
       color: HEART_COLORS[Math.floor(Math.random() * HEART_COLORS.length)],
-      sway,
-      speed,
-      wobbleFreq,
-      wobblePhase,
-      age:   0,
-      opacity: 0,
+      sway:  (Math.random() - 0.5) * 1.2,
+      speed: 1.2 + Math.random() * 1.4,
+      wobbleFreq:  0.03 + Math.random() * 0.03,
+      wobblePhase: Math.random() * Math.PI * 2,
+      age: 0, opacity: 0,
     };
   }
 
-  // Draw a hand-drawn-style heart at (cx, cy) with given size
   function drawHeart(ctx, cx, cy, size, color, opacity) {
     ctx.save();
     ctx.globalAlpha = opacity;
-
-    const s = size * 0.5; // half-size scale
-
+    const s = size * 0.5;
     ctx.beginPath();
-    // Classic heart via bezier curves, centred at (cx, cy)
     ctx.moveTo(cx, cy + s * 0.35);
     ctx.bezierCurveTo(cx, cy,           cx - s, cy - s * 0.5, cx - s, cy - s * 0.1);
     ctx.bezierCurveTo(cx - s, cy - s * 0.8, cx, cy - s * 0.9, cx, cy - s * 0.4);
     ctx.bezierCurveTo(cx, cy - s * 0.9, cx + s, cy - s * 0.8, cx + s, cy - s * 0.1);
     ctx.bezierCurveTo(cx + s, cy - s * 0.5, cx, cy,           cx, cy + s * 0.35);
     ctx.closePath();
-
-    ctx.fillStyle   = color;
-    ctx.fill();
-
-    // Slightly wobbly ink outline — hand-drawn feel
-    ctx.strokeStyle = 'rgba(61,47,47,0.22)';
-    ctx.lineWidth   = 1.6;
-    ctx.stroke();
-
-    // Little shine spot
+    ctx.fillStyle = color; ctx.fill();
+    ctx.strokeStyle = 'rgba(61,47,47,0.22)'; ctx.lineWidth = 1.6; ctx.stroke();
     ctx.beginPath();
-    ctx.ellipse(cx - s * 0.28, cy - s * 0.42, s * 0.18, s * 0.12, -0.5, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(255,255,255,0.45)';
-    ctx.fill();
-
-    // String — a gentle wavy line downward
+    ctx.ellipse(cx - s*0.28, cy - s*0.42, s*0.18, s*0.12, -0.5, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(255,255,255,0.45)'; ctx.fill();
     ctx.beginPath();
-    ctx.moveTo(cx, cy + s * 0.35);
-    ctx.quadraticCurveTo(cx + s * 0.3, cy + s * 0.8, cx, cy + s * 1.6);
-    ctx.strokeStyle = 'rgba(61,47,47,0.18)';
-    ctx.lineWidth   = 1.2;
-    ctx.stroke();
-
+    ctx.moveTo(cx, cy + s*0.35);
+    ctx.quadraticCurveTo(cx + s*0.3, cy + s*0.8, cx, cy + s*1.6);
+    ctx.strokeStyle = 'rgba(61,47,47,0.18)'; ctx.lineWidth = 1.2; ctx.stroke();
     ctx.restore();
   }
 
   let spawnTimer = 0;
-  const SPAWN_INTERVAL = 18; // frames between new balloons
+  const SPAWN_INTERVAL = 18;
 
   function tickBalloons() {
     bCtx.clearRect(0, 0, balloonCanvas.width, balloonCanvas.height);
-
-    // Spawn new balloon every N frames
     spawnTimer++;
-    if (spawnTimer >= SPAWN_INTERVAL) {
-      spawnTimer = 0;
-      balloons.push(makeBalloon());
-    }
-
+    if (spawnTimer >= SPAWN_INTERVAL) { spawnTimer = 0; balloons.push(makeBalloon()); }
     balloons = balloons.filter(b => b.y > -b.size * 2);
-
     for (const b of balloons) {
-      b.age++;
-      b.y -= b.speed;
+      b.age++; b.y -= b.speed;
       b.x += b.sway + Math.sin(b.age * b.wobbleFreq + b.wobblePhase) * 0.6;
-
-      // Fade in over first 30 frames, fade out near top
       const fadeIn  = Math.min(1, b.age / 30);
-      const fadeOut = Math.min(1, Math.max(0, (b.y) / (balloonCanvas.height * 0.2)));
+      const fadeOut = Math.min(1, Math.max(0, b.y / (balloonCanvas.height * 0.2)));
       b.opacity = fadeIn * fadeOut;
-
       drawHeart(bCtx, b.x, b.y, b.size, b.color, b.opacity);
     }
-
     balloonAnimId = requestAnimationFrame(tickBalloons);
   }
 
   function launchBalloons() {
     resizeBalloonCanvas();
     balloonCanvas.style.display = 'block';
-    balloons    = [];
-    spawnTimer  = 0;
-    // Pre-populate a few so screen isn't empty at start
+    balloons = []; spawnTimer = 0;
     for (let i = 0; i < 8; i++) {
       const b = makeBalloon();
       b.y = balloonCanvas.height * (0.3 + Math.random() * 0.7);
@@ -813,10 +873,7 @@
   }
 
   function stopBalloons() {
-    if (balloonAnimId) {
-      cancelAnimationFrame(balloonAnimId);
-      balloonAnimId = null;
-    }
+    if (balloonAnimId) { cancelAnimationFrame(balloonAnimId); balloonAnimId = null; }
     bCtx.clearRect(0, 0, balloonCanvas.width, balloonCanvas.height);
     balloonCanvas.style.display = 'none';
     balloons = [];
