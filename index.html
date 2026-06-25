@@ -32,9 +32,100 @@
       padding: 36px 16px 80px;
       gap: 20px;
       color: var(--ink);
+      overflow-x: hidden;
     }
 
     .svg-filters { position: absolute; width: 0; height: 0; }
+
+    /* ════════════════════════════════════════
+       INTRO SCREEN
+    ════════════════════════════════════════ */
+    #intro {
+      position: fixed; inset: 0;
+      background: var(--cream);
+      background-image: repeating-linear-gradient(
+        0deg, transparent, transparent 27px,
+        rgba(180,160,140,0.08) 27px, rgba(180,160,140,0.08) 28px
+      );
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      transition: opacity 0.7s ease, visibility 0.7s ease;
+    }
+    #intro.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+    /* The assembled machine preview in the intro */
+    .intro-machine {
+      position: relative;
+      width: 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Each part slides in from a different direction */
+    .intro-part {
+      opacity: 0;
+      transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.22,1,0.36,1);
+    }
+    .intro-part.slide-down  { transform: translateY(-40px); }
+    .intro-part.slide-up    { transform: translateY(40px); }
+    .intro-part.slide-left  { transform: translateX(-40px); }
+    .intro-part.slide-right { transform: translateX(40px); }
+    .intro-part.visible {
+      opacity: 1;
+      transform: translate(0, 0);
+    }
+
+    /* Intro machine parts drawn as inline SVGs */
+    .intro-machine svg { display: block; width: 200px; }
+
+    /* Curtain lines */
+    .intro-curtain-left, .intro-curtain-right {
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 50%;
+      background: var(--rose-mid);
+      transition: transform 0.7s cubic-bezier(0.76, 0, 0.24, 1);
+      z-index: -1;
+    }
+    .intro-curtain-left  { left: 0;   transform-origin: left;  }
+    .intro-curtain-right { right: 0;  transform-origin: right; }
+    .intro-curtain-left.open  { transform: scaleX(0); }
+    .intro-curtain-right.open { transform: scaleX(0); }
+
+    /* Intro text below machine */
+    .intro-tagline {
+      font-size: 20px;
+      color: var(--ink-soft);
+      margin-top: 18px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.5s ease 1.6s, transform 0.5s ease 1.6s;
+    }
+    .intro-tagline.visible { opacity: 1; transform: translateY(0); }
+
+    .intro-btn {
+      margin-top: 20px;
+      font-family: 'Caveat', cursive;
+      font-size: 19px; font-weight: 700;
+      color: var(--ink);
+      background: var(--butter);
+      border: 2.5px solid var(--ink);
+      border-radius: 4px 14px 6px 12px / 12px 4px 14px 6px;
+      padding: 8px 32px;
+      cursor: pointer;
+      box-shadow: 4px 4px 0 rgba(60,40,40,0.15);
+      opacity: 0;
+      transform: translateY(10px) scale(0.9);
+      transition: opacity 0.5s ease 2s, transform 0.5s ease 2s, box-shadow 0.1s, translate 0.1s;
+    }
+    .intro-btn.visible { opacity: 1; transform: translateY(0) scale(1); }
+    .intro-btn:hover { box-shadow: 5px 5px 0 rgba(60,40,40,0.2); translate: -1px -1px; }
+    .intro-btn:active { box-shadow: 2px 2px 0 rgba(60,40,40,0.15); translate: 1px 1px; }
 
     /* ── Header ── */
     .header { text-align: center; }
@@ -51,41 +142,43 @@
       transform: rotate(0.5deg); display: inline-block;
     }
 
-    /* ── Background doodle ── */
+    /* ── Background doodle — parallax layer ── */
     .bg-doodle {
       position: fixed; top: 0; left: 0;
       width: 100%; height: 100%;
       pointer-events: none; z-index: 0; overflow: hidden;
+      will-change: transform;
     }
     .bg-doodle svg { width: 100%; height: 100%; }
-    body > *:not(.bg-doodle) { position: relative; z-index: 1; }
+    body > *:not(.bg-doodle):not(#intro) { position: relative; z-index: 1; }
 
-    /* ── Machine stage ── */
+    /* ── Machine stage — parallax layer ── */
     .machine-stage {
       position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
+      will-change: transform;
     }
 
-    /* Machine shake animation */
     .machine-svg-wrap {
       position: relative;
       width: 270px;
     }
     .machine-svg-wrap > svg { width: 100%; height: auto; overflow: visible; }
 
+    /* ── Keyframes ── */
     @keyframes machine-shake {
-      0%,100% { transform: translate(0, 0) rotate(0deg); }
-      10%     { transform: translate(-3px, 1px) rotate(-0.8deg); }
-      20%     { transform: translate(3px, -2px) rotate(0.8deg); }
-      30%     { transform: translate(-4px, 2px) rotate(-1deg); }
-      40%     { transform: translate(4px, -1px) rotate(1deg); }
-      50%     { transform: translate(-3px, 2px) rotate(-0.6deg); }
-      60%     { transform: translate(3px, -2px) rotate(0.6deg); }
-      70%     { transform: translate(-2px, 1px) rotate(-0.4deg); }
-      80%     { transform: translate(2px, -1px) rotate(0.4deg); }
-      90%     { transform: translate(-1px, 0px) rotate(-0.2deg); }
+      0%,100% { transform: translate(0,0) rotate(0deg); }
+      10% { transform: translate(-3px,1px) rotate(-0.8deg); }
+      20% { transform: translate(3px,-2px) rotate(0.8deg); }
+      30% { transform: translate(-4px,2px) rotate(-1deg); }
+      40% { transform: translate(4px,-1px) rotate(1deg); }
+      50% { transform: translate(-3px,2px) rotate(-0.6deg); }
+      60% { transform: translate(3px,-2px) rotate(0.6deg); }
+      70% { transform: translate(-2px,1px) rotate(-0.4deg); }
+      80% { transform: translate(2px,-1px) rotate(0.4deg); }
+      90% { transform: translate(-1px,0px) rotate(-0.2deg); }
     }
 
     /* Globe balls */
@@ -95,14 +188,12 @@
       gap: 6px; padding: 16px;
       width: 170px; height: 170px;
     }
-
     .mini-ball {
       width: 26px; height: 26px; border-radius: 50%;
       position: relative; flex-shrink: 0;
       animation: bob 2.4s ease-in-out infinite;
       outline: 2px solid rgba(60,40,40,0.18);
     }
-
     .mini-ball::after {
       content: ''; position: absolute;
       top: 4px; left: 6px; width: 8px; height: 5px;
@@ -117,13 +208,12 @@
     .mini-ball:nth-child(7) { animation-delay: 0.15s; }
     .mini-ball:nth-child(8) { animation-delay: 0.45s; }
     .mini-ball:nth-child(9) { animation-delay: 0.75s; }
-
     @keyframes bob {
-      0%, 100% { transform: translateY(0) rotate(-1deg); }
-      50%       { transform: translateY(-5px) rotate(1deg); }
+      0%,100% { transform: translateY(0) rotate(-1deg); }
+      50%      { transform: translateY(-5px) rotate(1deg); }
     }
 
-    /* ── Knob hit area ── */
+    /* Knob */
     .knob-hitarea {
       position: absolute;
       bottom: 68px; right: 46px;
@@ -136,36 +226,31 @@
       border: 2.5px solid #3d2f2f;
       box-shadow: 3px 3px 0 #b8a060;
       display: flex; align-items: center; justify-content: center;
-      transition: box-shadow 0.1s, transform 0.1s;
     }
     .knob-hitarea::before {
-      content: '';
-      position: absolute;
+      content: ''; position: absolute;
       top: 6px; left: 50%; transform: translateX(-50%);
       width: 5px; height: 17px;
-      background: #b8a060;
-      border-radius: 3px;
+      background: #b8a060; border-radius: 3px;
     }
     .knob-hitarea::after {
-      content: '';
-      position: absolute;
+      content: ''; position: absolute;
       top: 9px; left: 8px;
       width: 14px; height: 9px;
-      background: rgba(255,255,255,0.38);
-      border-radius: 50%;
+      background: rgba(255,255,255,0.38); border-radius: 50%;
       transform: rotate(-20deg);
     }
     .knob-hitarea:focus-visible { outline: 2px dashed var(--rose-dark); outline-offset: 3px; }
     .knob-hitarea.disabled { cursor: default; pointer-events: none; opacity: 0.6; }
 
     @keyframes knob-press {
-      0%   { transform: translate(0,0) scale(1);         box-shadow: 3px 3px 0 #b8a060; }
-      50%  { transform: translate(2px,2px) scale(0.93);  box-shadow: 1px 1px 0 #b8a060; }
-      100% { transform: translate(2px,2px) scale(0.93);  box-shadow: 1px 1px 0 #b8a060; }
+      0%   { transform: translate(0,0) scale(1); box-shadow: 3px 3px 0 #b8a060; }
+      50%  { transform: translate(2px,2px) scale(0.93); box-shadow: 1px 1px 0 #b8a060; }
+      100% { transform: translate(2px,2px) scale(0.93); box-shadow: 1px 1px 0 #b8a060; }
     }
     @keyframes knob-spin {
-      0%   { transform: translate(2px,2px) scale(0.93) rotate(0deg);   box-shadow: 1px 1px 0 #b8a060; }
-      15%  { transform: rotate(150deg);  box-shadow: 3px 3px 0 #b8a060; }
+      0%   { transform: translate(2px,2px) scale(0.93) rotate(0deg); box-shadow: 1px 1px 0 #b8a060; }
+      15%  { transform: rotate(150deg); box-shadow: 3px 3px 0 #b8a060; }
       50%  { transform: rotate(290deg); }
       72%  { transform: rotate(342deg); }
       88%  { transform: rotate(357deg); }
@@ -173,38 +258,34 @@
     }
     @keyframes globe-shake-anim {
       0%   { transform: translate(0,0) rotate(0deg); }
-      12%  { transform: translate(-5px, 4px) rotate(-3deg); }
+      12%  { transform: translate(-5px,4px) rotate(-3deg); }
       25%  { transform: translate(6px,-4px) rotate(3deg); }
-      38%  { transform: translate(-4px, 5px) rotate(-2deg); }
+      38%  { transform: translate(-4px,5px) rotate(-2deg); }
       52%  { transform: translate(5px,-3px) rotate(2deg); }
-      65%  { transform: translate(-3px, 3px) rotate(-1deg); }
+      65%  { transform: translate(-3px,3px) rotate(-1deg); }
       78%  { transform: translate(2px,-2px) rotate(0.5deg); }
       100% { transform: translate(0,0) rotate(0deg); }
     }
     @keyframes ball-shuffle-anim {
       0%,100% { transform: translate(0,0) rotate(0deg); }
       20%     { transform: translate(-3px,-4px) rotate(-5deg); }
-      40%     { transform: translate(4px, 3px) rotate(4deg); }
-      60%     { transform: translate(-2px, 4px) rotate(-3deg); }
+      40%     { transform: translate(4px,3px) rotate(4deg); }
+      60%     { transform: translate(-2px,4px) rotate(-3deg); }
       80%     { transform: translate(3px,-2px) rotate(3deg); }
     }
 
-    /* ── Rolling ball ── */
+    /* Rolling ball */
     #rolling-ball {
       position: absolute;
       width: 34px; height: 34px;
       border-radius: 50%;
       outline: 2.5px solid rgba(60,40,40,0.2);
-      display: none;
-      z-index: 20;
+      display: none; z-index: 20;
     }
     #rolling-ball::before {
-      content: '';
-      position: absolute;
-      top: 6px; left: 9px;
-      width: 11px; height: 7px;
-      background: rgba(255,255,255,0.5);
-      border-radius: 50%;
+      content: ''; position: absolute;
+      top: 6px; left: 9px; width: 11px; height: 7px;
+      background: rgba(255,255,255,0.5); border-radius: 50%;
       transform: rotate(-20deg);
     }
     #rolling-ball .rb-seam-h {
@@ -218,182 +299,193 @@
 
     .tray-wrap { position: relative; margin-top: -2px; }
 
-    /* ── Idle hint ── */
     .idle-hint {
       font-size: 17px; color: var(--ink-soft);
       text-align: center; transform: rotate(-0.5deg);
     }
-
-    /* ── Footer ── */
     .footer {
       font-size: 15px; color: var(--ink-soft);
       text-align: center; transform: rotate(-0.3deg);
       display: inline-block;
     }
 
-    /* ══════════════════════════════════════
-       MODAL — SCROLL UNROLL EFFECT
-    ══════════════════════════════════════ */
+    /* ════════════════════════════════════════
+       ENVELOPE MODAL
+    ════════════════════════════════════════ */
     .modal-overlay {
       display: none; position: fixed; inset: 0;
-      background: rgba(61,47,47,0.35);
-      z-index: 200; align-items: center;
+      background: transparent;
+      z-index: 100; align-items: center;
       justify-content: center; padding: 24px;
     }
     .modal-overlay.open { display: flex; }
 
-    /* Scroll container clips the unrolling content */
-    .modal-scroll-wrap {
+    .envelope-wrap {
+      width: 320px;
+      max-width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      opacity: 0;
+      transform: translateY(50px);
+      transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.22,1,0.36,1);
       position: relative;
-      max-width: 340px; width: 100%;
-      /* clip so content reveals from top down */
-      overflow: hidden;
-      /* starts at 0 height, expands to natural height */
-      animation: scroll-unroll 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+      z-index: 1;
     }
-    @keyframes scroll-unroll {
-      0%   { max-height: 0px;  opacity: 0.4; transform: scaleY(0.05) translateY(-20px); transform-origin: top center; }
-      40%  { opacity: 1; }
-      100% { max-height: 600px; transform: scaleY(1) translateY(0);  transform-origin: top center; }
+    .envelope-wrap.visible {
+      opacity: 1;
+      transform: translateY(0);
     }
 
-    /* The scroll rod at the top */
-    .scroll-rod-top, .scroll-rod-bottom {
-      width: 100%;
-      height: 18px;
-      background: linear-gradient(to bottom, #d4a880, #c09060);
-      border-radius: 9px;
-      border: 1.8px solid #3d2f2f;
-      box-shadow: 0 2px 4px rgba(60,40,40,0.18), inset 0 1px 0 rgba(255,255,255,0.25);
-      position: relative;
-      z-index: 2;
-    }
-    /* knobs on each end of the rod */
-    .scroll-rod-top::before, .scroll-rod-top::after,
-    .scroll-rod-bottom::before, .scroll-rod-bottom::after {
-      content: '';
-      position: absolute;
-      top: 50%; transform: translateY(-50%);
-      width: 14px; height: 14px;
-      border-radius: 50%;
-      background: #c09060;
-      border: 1.8px solid #3d2f2f;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.3);
-    }
-    .scroll-rod-top::before, .scroll-rod-bottom::before { left: -4px; }
-    .scroll-rod-top::after,  .scroll-rod-bottom::after  { right: -4px; }
-
-    /* Paper body of the scroll */
-    .modal {
-      position: relative;
+    /* Letter card — sits above the pocket, starts hidden below */
+    .letter {
       background: #fffdf7;
-      border-left: 2px solid #3d2f2f;
-      border-right: 2px solid #3d2f2f;
-      padding: 22px 28px 22px;
+      border: 2.5px solid var(--ink);
+      border-radius: 10px 10px 6px 6px;
+      padding: 24px 22px 20px;
       text-align: center;
-      box-shadow: inset 0 0 40px rgba(180,160,130,0.08);
-    }
-    /* subtle paper lines inside */
-    .modal::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: repeating-linear-gradient(
+      position: relative;
+      background-image: repeating-linear-gradient(
         0deg, transparent, transparent 27px,
         rgba(180,160,140,0.07) 27px, rgba(180,160,140,0.07) 28px
       );
+      z-index: 1;
+      /* hidden below, slides up via JS */
+      opacity: 0;
+      transform: translateY(60px);
+      transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.22,1,0.36,1);
+    }
+    .letter.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    /* washi tape */
+    .letter::before {
+      content: '';
+      position: absolute;
+      top: -11px; left: 50%;
+      transform: translateX(-50%) rotate(-1.5deg);
+      width: 50px; height: 16px;
+      background: rgba(240,224,160,0.8);
+      border-radius: 2px;
+      border: 1px solid rgba(180,160,80,0.3);
+    }
+
+    /* Envelope pocket */
+    .envelope-body {
+      position: relative;
+      width: 100%;
+      background: var(--rose);
+      border: 2.5px solid var(--ink);
+      border-radius: 0 0 12px 12px;
+      height: 100px;
+      box-shadow: 4px 5px 0 rgba(60,40,40,0.14);
+      overflow: hidden;
+      flex-shrink: 0;
+      z-index: 2;
+    }
+    /* V-crease */
+    .envelope-body::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(135deg,  var(--rose-mid) 50%, transparent 50%),
+        linear-gradient(-135deg, var(--rose-mid) 50%, transparent 50%);
+      background-size: 50% 100%;
+      background-position: left, right;
+      background-repeat: no-repeat;
+      opacity: 0.4;
+      border-radius: 0 0 12px 12px;
       pointer-events: none;
     }
 
-    .modal-ball {
-      width: 80px; height: 80px; border-radius: 50%;
-      margin: 0 auto 18px; position: relative;
-      box-shadow: 3px 3px 0 rgba(60,40,40,0.15), 0 0 0 3px rgba(60,40,40,0.1);
-      animation: ball-appear 0.4s cubic-bezier(0.18,0.89,0.32,1.28) 0.35s both;
+    /* Flap — collapses via JS transition */
+    .envelope-flap {
+      position: absolute;
+      top: 0; left: -2px; right: -2px;
+      height: 80px;
+      background: var(--rose-mid);
+      border: 2.5px solid var(--ink);
+      border-bottom: none;
+      border-radius: 4px 4px 0 0;
+      clip-path: polygon(0 0, 100% 0, 50% 100%);
+      transform-origin: top center;
+      z-index: 10;
+      transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
     }
-    @keyframes ball-appear {
-      0%   { opacity: 0; transform: scale(0.4) rotate(-12deg); }
-      100% { opacity: 1; transform: scale(1) rotate(0deg); }
-    }
-    .modal-ball::before {
-      content: ''; position: absolute;
-      top: 11px; left: 15px;
-      width: 20px; height: 12px;
-      background: rgba(255,255,255,0.5); border-radius: 50%;
-      transform: rotate(-20deg);
-    }
-    .modal-ball .seam-h {
-      position: absolute; top: 50%; left: 5%; right: 5%; height: 2px;
-      background: rgba(60,40,40,0.1); transform: translateY(-50%); border-radius: 1px;
-    }
-    .modal-ball .seam-v {
-      position: absolute; left: 50%; top: 5%; bottom: 5%; width: 2px;
-      background: rgba(60,40,40,0.1); transform: translateX(-50%); border-radius: 1px;
+    .envelope-flap.open {
+      transform: scaleY(0);
+      opacity: 0;
     }
 
-    .modal-message {
+    /* Seal */
+    .envelope-seal {
+      position: absolute;
+      top: 10px; left: 50%;
+      transform: translateX(-50%);
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: var(--butter);
+      border: 2px solid var(--ink);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      z-index: 11;
+      box-shadow: 2px 2px 0 rgba(60,40,40,0.15);
+      transition: opacity 0.25s ease;
+    }
+    .envelope-seal.hidden { opacity: 0; pointer-events: none; }
+
+    .letter-message {
       font-family: 'Caveat', cursive;
-      font-size: 21px; font-weight: 600;
+      font-size: 20px; font-weight: 600;
       color: var(--ink); line-height: 1.5;
-      animation: text-appear 0.35s ease 0.55s both;
+      opacity: 0; transform: translateY(8px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
     }
-    @keyframes text-appear {
-      0%   { opacity: 0; transform: translateY(6px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
+    .letter-message.visible { opacity: 1; transform: translateY(0); }
 
-    .modal-close {
-      margin-top: 20px; display: inline-block;
+    .letter-close {
+      margin-top: 16px; display: inline-block;
       font-family: 'Caveat', cursive;
       font-size: 17px; font-weight: 700; color: var(--ink);
       background: var(--butter);
       border: 2px solid var(--ink);
       border-radius: 3px 10px 4px 8px / 8px 3px 10px 4px;
-      padding: 6px 24px; cursor: pointer;
+      padding: 6px 22px; cursor: pointer;
       box-shadow: 3px 3px 0 rgba(60,40,40,0.15);
-      transition: transform 0.1s, box-shadow 0.1s;
+      transition: transform 0.1s, box-shadow 0.1s, opacity 0.35s ease;
       -webkit-tap-highlight-color: transparent;
-      animation: text-appear 0.3s ease 0.7s both;
+      opacity: 0;
     }
-    .modal-close:hover  { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 rgba(60,40,40,0.15); }
-    .modal-close:active { transform: translate(2px,2px);   box-shadow: 1px 1px 0 rgba(60,40,40,0.15); }
+    .letter-close.visible { opacity: 1; }
+    .letter-close:hover  { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 rgba(60,40,40,0.15); }
+    .letter-close:active { transform: translate(2px,2px);   box-shadow: 1px 1px 0 rgba(60,40,40,0.15); }
 
-    /* ── Final message glow ── */
-    .modal-overlay.final .modal-scroll-wrap {
-      filter: drop-shadow(0 0 18px rgba(232,180,188,0.5));
-      animation: scroll-unroll 0.6s cubic-bezier(0.22, 1, 0.36, 1) both,
-                 final-glow-wrap 2s ease-in-out 0.8s infinite alternate;
-    }
-    @keyframes final-glow-wrap {
-      0%   { filter: drop-shadow(0 0 8px  rgba(232,180,188,0.3)); }
-      100% { filter: drop-shadow(0 0 24px rgba(232,180,188,0.7)); }
-    }
-    .modal-overlay.final .scroll-rod-top,
-    .modal-overlay.final .scroll-rod-bottom {
-      background: linear-gradient(to bottom, #e8b4bc, #d4909a);
-      border-color: #b87080;
-    }
-    .modal-overlay.final .scroll-rod-top::before,
-    .modal-overlay.final .scroll-rod-top::after,
-    .modal-overlay.final .scroll-rod-bottom::before,
-    .modal-overlay.final .scroll-rod-bottom::after {
-      background: #d4909a;
-      border-color: #b87080;
+    /* Final message glow */
+    .modal-overlay.final .envelope-body { background: #f0c8d0; }
+    .modal-overlay.final .letter {
+      box-shadow: 0 0 28px rgba(232,180,188,0.6);
     }
 
-    /* ── Heart balloon canvas ── */
+    /* Celebration canvas — same layer as modal, floats over the whole page */
     #balloon-canvas {
-      position: fixed; inset: 0;
+      position: fixed;
+      inset: 0;
       width: 100%; height: 100%;
       pointer-events: none;
-      z-index: 998;
+      z-index: 100;
     }
 
     @media (max-width: 320px) {
       .machine-svg-wrap { width: 230px; }
       .knob-hitarea { right: 36px; bottom: 58px; width: 46px; height: 46px; }
+      .envelope-wrap { width: 280px; }
     }
     @media (prefers-reduced-motion: reduce) {
-      .mini-ball, .modal-ball, .modal-scroll-wrap { animation: none !important; }
+      .intro-part, .intro-tagline, .intro-btn,
+      .mini-ball, .letter, .envelope-flap,
+      .letter-ball, .letter-message, .letter-close { animation: none !important; }
       .knob-hitarea { animation: none !important; }
     }
   </style>
@@ -410,8 +502,79 @@
   </defs>
 </svg>
 
-<!-- Background doodles -->
-<div class="bg-doodle" aria-hidden="true">
+<!-- ════════════════════════════
+     INTRO SCREEN
+════════════════════════════ -->
+<div id="intro">
+  <div class="intro-machine" id="intro-machine">
+
+    <!-- Top cap slides down -->
+    <div class="intro-part slide-down" id="ip-cap">
+      <svg viewBox="0 0 200 32" xmlns="http://www.w3.org/2000/svg">
+        <rect x="4" y="2" width="192" height="28" rx="12"
+              fill="#d4909a" stroke="#3d2f2f" stroke-width="2"/>
+        <circle cx="30" cy="16" r="6" fill="#f0e0a0" stroke="#3d2f2f" stroke-width="1.5"/>
+        <text x="100" y="21" text-anchor="middle"
+              font-family="Caveat,cursive" font-size="12" font-weight="700"
+              fill="rgba(253,248,240,0.9)" letter-spacing="3">GACHA</text>
+        <circle cx="170" cy="16" r="6" fill="#c9c0e0" stroke="#3d2f2f" stroke-width="1.5"/>
+      </svg>
+    </div>
+
+    <!-- Globe slides in from left -->
+    <div class="intro-part slide-left" id="ip-globe">
+      <svg viewBox="0 0 200 158" xmlns="http://www.w3.org/2000/svg">
+        <rect x="4" y="0" width="192" height="158" fill="#e8b4bc" stroke="#3d2f2f" stroke-width="2"/>
+        <circle cx="100" cy="80" r="72" fill="rgba(253,248,240,0.52)" stroke="#3d2f2f" stroke-width="2.2"/>
+        <circle cx="60"  cy="58" r="10" fill="#f5bfc4" stroke="rgba(60,40,40,0.2)" stroke-width="1.5"/>
+        <circle cx="84"  cy="48" r="10" fill="#b8d4e8" stroke="rgba(60,40,40,0.2)" stroke-width="1.5"/>
+        <circle cx="110" cy="50" r="10" fill="#c9c0e0" stroke="rgba(60,40,40,0.2)" stroke-width="1.5"/>
+        <circle cx="70"  cy="80" r="10" fill="#f0e0a0" stroke="rgba(60,40,40,0.2)" stroke-width="1.5"/>
+        <circle cx="100" cy="74" r="10" fill="#b4d8c8" stroke="rgba(60,40,40,0.2)" stroke-width="1.5"/>
+        <circle cx="130" cy="76" r="10" fill="#f2c9a8" stroke="rgba(60,40,40,0.2)" stroke-width="1.5"/>
+        <circle cx="80"  cy="104" r="10" fill="#d4c4e8" stroke="rgba(60,40,40,0.2)" stroke-width="1.5"/>
+        <circle cx="115" cy="108" r="10" fill="#a8d4c0" stroke="rgba(60,40,40,0.2)" stroke-width="1.5"/>
+        <circle cx="140" cy="96" r="10" fill="#f0c8d0" stroke="rgba(60,40,40,0.2)" stroke-width="1.5"/>
+        <ellipse cx="76" cy="54" rx="16" ry="9" fill="rgba(255,255,255,0.35)" transform="rotate(-20,76,54)"/>
+      </svg>
+    </div>
+
+    <!-- Body slides in from right -->
+    <div class="intro-part slide-right" id="ip-body">
+      <svg viewBox="0 0 200 106" xmlns="http://www.w3.org/2000/svg">
+        <!-- neck -->
+        <rect x="4" y="0" width="192" height="18" fill="#c87880" stroke="#3d2f2f" stroke-width="2"/>
+        <rect x="76" y="6" width="48" height="6" rx="3" fill="rgba(30,20,20,0.22)"/>
+        <!-- body -->
+        <rect x="4" y="18" width="192" height="88" fill="#e8b4bc" stroke="#3d2f2f" stroke-width="2"/>
+        <!-- coin slot -->
+        <rect x="24" y="28" width="40" height="56" rx="7" fill="#d4909a" stroke="#3d2f2f" stroke-width="1.8"/>
+        <rect x="34" y="40" width="20" height="4" rx="2" fill="rgba(30,20,20,0.28)"/>
+        <rect x="34" y="50" width="20" height="4" rx="2" fill="rgba(30,20,20,0.28)"/>
+        <!-- knob -->
+        <circle cx="144" cy="60" r="26" fill="#f0e0a0" stroke="#3d2f2f" stroke-width="2.2"/>
+        <rect x="141" y="38" width="5" height="15" rx="2.5" fill="#b8a060"/>
+      </svg>
+    </div>
+
+    <!-- Base slides up -->
+    <div class="intro-part slide-up" id="ip-base">
+      <svg viewBox="0 0 200 30" xmlns="http://www.w3.org/2000/svg">
+        <rect x="4" y="0" width="192" height="30" rx="0 0 12 12"
+              fill="#c87880" stroke="#3d2f2f" stroke-width="2"/>
+        <rect x="76" y="0" width="48" height="20" rx="0 0 8 8"
+              fill="rgba(30,20,20,0.22)"/>
+      </svg>
+    </div>
+
+  </div>
+
+  <p class="intro-tagline" id="intro-tagline">a little something for you 🎀</p>
+  <button class="intro-btn" id="intro-btn" onclick="startExperience()">open~</button>
+</div>
+
+<!-- Background doodles (parallax layer) -->
+<div class="bg-doodle" id="bg-doodle" aria-hidden="true">
   <svg viewBox="0 0 800 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
     <g fill="none" stroke="rgba(180,144,160,0.22)" stroke-width="1.5" stroke-linecap="round">
       <line x1="60"  y1="80"  x2="60"  y2="92" /><line x1="54"  y1="86"  x2="66"  y2="86" />
@@ -433,11 +596,17 @@
       <path d="M0 250 Q100 240 200 255 Q300 268 400 252 Q500 238 600 255 Q700 268 800 252"/>
       <path d="M0 650 Q100 640 200 655 Q300 668 400 650 Q500 635 600 652 Q700 666 800 650"/>
     </g>
+    <!-- Extra doodles for parallax depth -->
+    <g fill="none" stroke="rgba(180,144,160,0.15)" stroke-width="1" stroke-linecap="round">
+      <circle cx="350" cy="300" r="18"/>
+      <circle cx="600" cy="450" r="12"/>
+      <circle cx="150" cy="550" r="14"/>
+      <path d="M500 200 Q520 180 540 200 Q560 220 580 200"/>
+      <path d="M80  350 Q100 330 120 350 Q140 370 160 350"/>
+      <path d="M620 700 Q640 680 660 700 Q680 720 700 700"/>
+    </g>
   </svg>
 </div>
-
-<!-- Heart balloon canvas -->
-<canvas id="balloon-canvas" style="display:none"></canvas>
 
 <!-- ── Header ── -->
 <header class="header">
@@ -447,14 +616,13 @@
   <p class="header-sub">turn the yellow knob for a little surprise~</p>
 </header>
 
-<!-- ── Machine stage ── -->
+<!-- ── Machine stage (parallax layer) ── -->
 <div class="machine-stage" id="machine-stage">
   <div class="machine-svg-wrap" id="machine-svg-wrap">
 
     <svg id="machine-svg" viewBox="0 0 270 390" xmlns="http://www.w3.org/2000/svg"
          style="filter:url(#wobble)" aria-hidden="true">
 
-      <!-- Top cap -->
       <rect x="14" y="10" width="242" height="34" rx="14"
             fill="#d4909a" stroke="#3d2f2f" stroke-width="2.2" stroke-linejoin="round"/>
       <circle cx="52"  cy="27" r="6" fill="#f0e0a0" stroke="#3d2f2f" stroke-width="1.6"/>
@@ -465,7 +633,6 @@
       <circle cx="198" cy="27" r="6" fill="rgba(253,248,240,0.6)" stroke="#3d2f2f" stroke-width="1.6"/>
       <circle cx="218" cy="27" r="6" fill="#c9c0e0" stroke="#3d2f2f" stroke-width="1.6"/>
 
-      <!-- Globe shell -->
       <rect x="14" y="44" width="242" height="188" rx="0"
             fill="#e8b4bc" stroke="#3d2f2f" stroke-width="2.2"/>
       <circle cx="135" cy="138" r="96"
@@ -473,38 +640,27 @@
       <ellipse cx="108" cy="102" rx="22" ry="13"
                fill="rgba(255,255,255,0.38)" transform="rotate(-20,108,102)"/>
 
-      <!-- Balls inside globe -->
       <foreignObject x="50" y="53" width="170" height="170">
         <div xmlns="http://www.w3.org/1999/xhtml" class="globe-balls" id="globe-balls">
-          <div class="mini-ball" style="background:#f5bfc4"></div>
-          <br>
+          <div class="mini-ball" style="background:#f5bfc4"></div><br>
           <div class="mini-ball" style="background:#b8d4e8"></div>
-          <div class="mini-ball" style="background:#c9c0e0"></div>
-          <br>
-          <div class="mini-ball" style="background:#f0e0a0"></div>
-          <br>
-          <div class="mini-ball" style="background:#b4d8c8"></div>
-          <br>
-          <div class="mini-ball" style="background:#f2c9a8"></div>
-          <br>
-          <div class="mini-ball" style="background:#d4c4e8"></div>
-          <br>
-          <div class="mini-ball" style="background:#a8d4c0"></div>
-          <br>
+          <div class="mini-ball" style="background:#c9c0e0"></div><br>
+          <div class="mini-ball" style="background:#f0e0a0"></div><br>
+          <div class="mini-ball" style="background:#b4d8c8"></div><br>
+          <div class="mini-ball" style="background:#f2c9a8"></div><br>
+          <div class="mini-ball" style="background:#d4c4e8"></div><br>
+          <div class="mini-ball" style="background:#a8d4c0"></div><br>
           <div class="mini-ball" style="background:#f0c8d0"></div>
         </div>
       </foreignObject>
 
-      <!-- Neck -->
       <rect x="14" y="232" width="242" height="22" rx="0"
             fill="#c87880" stroke="#3d2f2f" stroke-width="2.2"/>
       <rect x="103" y="239" width="64" height="7" rx="3" fill="rgba(30,20,20,0.22)"/>
 
-      <!-- Body -->
       <rect x="14" y="254" width="242" height="100" rx="0"
             fill="#e8b4bc" stroke="#3d2f2f" stroke-width="2.2"/>
 
-      <!-- Coin slot -->
       <rect x="38" y="270" width="48" height="66" rx="8"
             fill="#d4909a" stroke="#3d2f2f" stroke-width="2"/>
       <rect x="50" y="285" width="24" height="5" rx="2.5" fill="rgba(30,20,20,0.28)"/>
@@ -513,7 +669,6 @@
             font-family="Caveat, cursive" font-size="10" font-weight="600"
             fill="rgba(253,248,240,0.7)">¥100</text>
 
-      <!-- Knob stem -->
       <g id="knob-group">
         <rect x="164" y="280" width="8" height="18" rx="3"
               fill="#c87880" stroke="#3d2f2f" stroke-width="1.5"/>
@@ -522,26 +677,22 @@
             font-family="Caveat, cursive" font-size="11" font-weight="600"
             fill="rgba(253,248,240,0.75)" letter-spacing="2">TURN</text>
 
-      <!-- Base -->
       <rect x="14" y="354" width="242" height="30" rx="0 0 14 14"
             fill="#c87880" stroke="#3d2f2f" stroke-width="2.2"/>
       <rect x="103" y="354" width="64" height="22" rx="0 0 9 9"
             fill="rgba(30,20,20,0.22)"/>
     </svg>
 
-    <!-- Knob hit area -->
     <div class="knob-hitarea" id="knob"
          onclick="turnKnob()" role="button"
          tabindex="0" aria-label="Turn the gachapon knob"></div>
 
-    <!-- Rolling ball -->
     <div id="rolling-ball">
       <div class="rb-seam-h"></div>
       <div class="rb-seam-v"></div>
     </div>
   </div>
 
-  <!-- Tray -->
   <div class="tray-wrap">
     <svg viewBox="0 0 130 38" width="130" height="38"
          style="filter:url(#wobble)" aria-hidden="true">
@@ -556,37 +707,43 @@
 <p class="idle-hint" id="idle-hint">🎀 open message 1 of <span id="total-count"></span>~</p>
 <footer class="footer">made by timmy 💖 for sanny</footer>
 
-<!-- ── Modal — scroll design ── -->
-<div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-message">
-  <div class="modal-scroll-wrap" id="modal-scroll-wrap">
-    <div class="scroll-rod-top"></div>
-    <div class="modal">
-      <div class="modal-ball" id="modal-ball">
-        <div class="seam-h"></div>
-        <div class="seam-v"></div>
-      </div>
-      <p class="modal-message" id="modal-message"></p>
-      <button class="modal-close" onclick="closeModal()">close ✿</button>
+<!-- Heart balloon canvas — full screen celebration -->
+<canvas id="balloon-canvas" style="display:none"></canvas>
+
+<!-- ── Envelope Modal ── -->
+<div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true">
+  <div class="envelope-wrap" id="envelope-wrap">
+
+    <!-- Letter sits ABOVE the envelope pocket, starts hidden below and rises up -->
+    <div class="letter" id="letter">
+      <p class="letter-message" id="modal-message"></p>
+      <button class="letter-close" onclick="closeModal()">close ✿</button>
     </div>
-    <div class="scroll-rod-bottom"></div>
+
+    <!-- Envelope pocket (bottom part) -->
+    <div class="envelope-body">
+      <div class="envelope-flap"></div>
+      <div class="envelope-seal">💌</div>
+    </div>
+
   </div>
 </div>
 
 
 <!-- ════════════════════════════════
-     CUSTOMIZE YOUR MESSAGES HERE!
+     MESSAGES — customise here
      ════════════════════════════════ -->
 <script>
   const MESSAGES = [
-    "The day is finally here! Yay!",
+    "It's a very special day for a special princess! 👑",
+    "Do you know what day it is? 🌈",
+    "It's your birthday!🎀",
     "I wish I could be with you in person and give you the the warmest hug 🌟",
     "Thank you for being such an amazing girlfriend! ✨",
     "Eventhough we're apart, I want you to know how much I love you! 🎉",
-    "I wish you happiness and joy every day! 💖",
-    "To my beautiful girlfriend 🌈",
-    "My bestfriend, my wifey, my love 🎊",
-    "from the bottom of my heart 🎀",
+    "I hope we will spend many more birthdays together! 🎊",
     "Sending you the biggest birthday hug! 🤗",
+    "to my bestfriend, my wifey, my love 💖",
     "Happy Birthday! I love you so much   💖"
   ];
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -599,7 +756,6 @@
 
   let busy = false;
   let msgIndex = 0;
-
   document.getElementById('total-count').textContent = MESSAGES.length;
 
   function nextMessage() {
@@ -608,14 +764,65 @@
     return MESSAGES[i];
   }
 
-  /* ─────────────────────────────────────────────────
-     SEQUENCE
-     0–180ms  : knob presses down
-     180–920ms: knob spins + machine shakes + balls shuffle
-     920ms+   : ball slides out → scroll unrolls → modal
-  ───────────────────────────────────────────────── */
+  /* ════════════════════════════════════════
+     INTRO SCREEN
+  ════════════════════════════════════════ */
+  function runIntro() {
+    const parts = document.querySelectorAll('.intro-part');
+    const delays = [0, 200, 350, 500]; // stagger each part
+
+    parts.forEach((p, i) => {
+      setTimeout(() => {
+        p.classList.add('visible');
+      }, delays[i] + 300);
+    });
+
+    // Tagline + button appear after machine is assembled
+    setTimeout(() => {
+      document.getElementById('intro-tagline').classList.add('visible');
+    }, 1100);
+    setTimeout(() => {
+      document.getElementById('intro-btn').classList.add('visible');
+    }, 1100);
+  }
+
+  function startExperience() {
+    document.getElementById('intro').classList.add('hidden');
+    // Remove from layout after fade finishes
+    setTimeout(() => {
+      document.getElementById('intro').style.display = 'none';
+    }, 750);
+  }
+
+  // Run intro on load
+  window.addEventListener('load', runIntro);
+
+  /* ════════════════════════════════════════
+     PARALLAX ON SCROLL
+  ════════════════════════════════════════ */
+  const bgDoodle     = document.getElementById('bg-doodle');
+  const machineStage = document.getElementById('machine-stage');
+
+  function onScroll() {
+    const y = window.scrollY;
+    // Background moves slower (parallax factor 0.25) — feels further away
+    bgDoodle.style.transform     = `translateY(${y * 0.25}px)`;
+    // Machine moves slightly slower than scroll (factor 0.08) — subtle floating
+    machineStage.style.transform = `translateY(${y * -0.06}px)`;
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  /* ════════════════════════════════════════
+     KNOB + ANIMATION SEQUENCE
+  ════════════════════════════════════════ */
+  function forceAnim(el, anim) {
+    el.style.animation = 'none';
+    el.offsetHeight; // reflow
+    el.style.animation = anim;
+  }
+
   function turnKnob() {
-    // If modal open, close it and start the next one
     const overlayCheck = document.getElementById('modal-overlay');
     if (overlayCheck.classList.contains('open')) {
       closeModal();
@@ -624,9 +831,10 @@
     if (busy) return;
     busy = true;
 
-    const isFinal    = (msgIndex === MESSAGES.length - 1);
-    const color      = BALL_COLORS[Math.floor(Math.random() * BALL_COLORS.length)];
-    const msg        = nextMessage();
+    // isFinal: this turn will show the LAST message
+    const isFinal = (msgIndex === MESSAGES.length - 1);
+    const color   = BALL_COLORS[msgIndex % BALL_COLORS.length];
+    const msg     = nextMessage();
     const knobHit    = document.getElementById('knob');
     const globeBalls = document.getElementById('globe-balls');
     const machineWrap= document.getElementById('machine-svg-wrap');
@@ -635,51 +843,30 @@
 
     knobHit.classList.add('disabled');
 
-    /* ── STAGE 1: force-restart all animations via style.animation ── */
-
-    // Helper: strip animation, force reflow, reapply
-    function forceAnim(el, anim) {
-      el.style.animation = 'none';
-      el.offsetHeight; // reflow
-      el.style.animation = anim;
-    }
-
-    // 1a. Knob press-down (0–180ms)
+    // Knob press → spin
     forceAnim(knobHit, 'knob-press 0.18s ease-out forwards');
-
-    // 1b. After press settles → full spin (180ms–1070ms)
     setTimeout(() => {
       forceAnim(knobHit, 'knob-spin 0.9s cubic-bezier(0.4,0,0.25,1) forwards');
     }, 180);
 
-    // 1c. Machine shake (120ms–750ms)
+    // Machine shake + globe/ball shuffle
     setTimeout(() => {
       forceAnim(machineWrap, 'machine-shake 0.65s cubic-bezier(0.36,0.07,0.19,0.97) both');
-    }, 120);
-
-    // 1d. Globe container shakes
-    setTimeout(() => {
-      forceAnim(globeBalls, 'globe-shake-anim 0.65s ease-in-out both');
-    }, 120);
-
-    // 1e. Each mini-ball shuffles individually
-    const miniBalls = globeBalls.querySelectorAll('.mini-ball');
-    setTimeout(() => {
+      forceAnim(globeBalls,  'globe-shake-anim 0.65s ease-in-out both');
+      const miniBalls = globeBalls.querySelectorAll('.mini-ball');
       miniBalls.forEach((b, i) => {
-        b.style.animation = 'none';
-        b.offsetHeight;
+        b.style.animation = 'none'; b.offsetHeight;
         b.style.animation = `ball-shuffle-anim 0.65s ease-in-out ${i % 2 === 0 ? '0s' : '0.1s'} both`;
       });
     }, 120);
 
-    // 1f. Clean up all animations after sequence finishes
+    // Clean up + ball slides out
     setTimeout(() => {
-      knobHit.style.animation  = '';
+      knobHit.style.animation   = '';
       machineWrap.style.animation = '';
       globeBalls.style.animation  = '';
-      miniBalls.forEach(b => { b.style.animation = ''; }); // reverts to CSS bob
+      globeBalls.querySelectorAll('.mini-ball').forEach(b => { b.style.animation = ''; });
 
-      /* STAGE 2 — ball slides out of chute */
       rb.style.background = color;
       rb.style.display    = 'block';
 
@@ -687,7 +874,6 @@
       const svgRect  = svgEl.getBoundingClientRect();
       const scaleX   = svgRect.width  / 270;
       const scaleY   = svgRect.height / 390;
-
       const chuteX   = 135 * scaleX;
       const chuteY   = 370 * scaleY;
 
@@ -719,34 +905,57 @@
         rb.style.top  = trayTop + 'px';
       }, 150);
 
-      setTimeout(() => {
-        rb.style.transition = 'transform 0.1s ease-out';
-        rb.style.transform  = 'scale(1.08, 0.93)';
-      }, 510);
-      setTimeout(() => {
-        rb.style.transition = 'transform 0.08s ease-in';
-        rb.style.transform  = 'scale(1)';
-      }, 620);
+      setTimeout(() => { rb.style.transition = 'transform 0.1s ease-out'; rb.style.transform = 'scale(1.08, 0.93)'; }, 510);
+      setTimeout(() => { rb.style.transition = 'transform 0.08s ease-in';  rb.style.transform = 'scale(1)'; }, 620);
 
-      /* STAGE 3 — scroll unrolls with the message */
+      // Open envelope with JS-driven class sequence
       setTimeout(() => {
         rb.style.display = 'none';
 
-        document.getElementById('modal-ball').style.background = color;
-        document.getElementById('modal-message').textContent   = msg;
+        const overlay  = document.getElementById('modal-overlay');
+        const wrap     = document.getElementById('envelope-wrap');
+        const letter   = document.getElementById('letter');
+        const flap     = wrap.querySelector('.envelope-flap');
+        const seal     = wrap.querySelector('.envelope-seal');
+        const msgEl    = document.getElementById('modal-message');
+        const closeBtn = wrap.querySelector('.letter-close');
 
-        // Re-trigger the unroll animation by cloning the scroll wrap
-        const wrap = document.getElementById('modal-scroll-wrap');
-        const clone = wrap.cloneNode(true);
-        wrap.parentNode.replaceChild(clone, wrap);
+        // Reset everything to hidden start state
+        wrap.classList.remove('visible');
+        letter.classList.remove('visible');
+        flap.classList.remove('open');
+        seal.classList.remove('hidden');
+        msgEl.classList.remove('visible');
+        closeBtn.classList.remove('visible');
 
-        const overlay = document.getElementById('modal-overlay');
-        if (isFinal) {
-          overlay.classList.add('final');
-          launchBalloons();
-        }
+        // Set content
+        msgEl.textContent = msg;
+
+        if (isFinal) overlay.classList.add('final');
         overlay.classList.add('open');
         overlay.addEventListener('click', onBackdropClick);
+
+        // Staggered envelope sequence
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          wrap.classList.add('visible');
+
+          setTimeout(() => {
+            seal.classList.add('hidden');
+            flap.classList.add('open');
+          }, 800);
+
+          setTimeout(() => {
+            letter.classList.add('visible');
+          }, 1400);
+
+          setTimeout(() => {
+            msgEl.classList.add('visible');
+          }, 2150);
+
+          setTimeout(() => {
+            closeBtn.classList.add('visible');
+          }, 2350);
+        }));
       }, 780);
 
     }, 920);
@@ -761,13 +970,14 @@
     overlay.classList.remove('open');
     overlay.classList.remove('final');
     overlay.removeEventListener('click', onBackdropClick);
-    stopBalloons();
     busy = false;
 
     if (msgIndex >= MESSAGES.length) {
       document.getElementById('knob').classList.add('disabled');
       document.getElementById('idle-hint').textContent = '🎀 that\'s all the messages! 我愛你~';
+      launchBalloons(); // 🎉 finale fires after envelope closes
     } else {
+      stopBalloons();
       document.getElementById('knob').classList.remove('disabled');
       document.getElementById('idle-hint').textContent =
         `turn again for message ${msgIndex + 1} of ${MESSAGES.length} ~`;
@@ -782,18 +992,17 @@
     if (e.key === 'Escape') closeModal();
   });
 
-
-  /* ══════════════════════════════════════════
-     HEART BALLOON CELEBRATION
-  ══════════════════════════════════════════ */
+  /* ════════════════════════════════════════════════════════
+     GRAND CELEBRATION — hearts + fireworks + flower petals
+  ════════════════════════════════════════════════════════ */
   const balloonCanvas = document.getElementById('balloon-canvas');
   const bCtx = balloonCanvas.getContext('2d');
   let balloonAnimId = null;
-  let balloons = [];
 
-  const HEART_COLORS = [
+  const CELEBRATE_COLORS = [
     '#f5bfc4','#c9c0e0','#f0e0a0','#b4d8c8',
     '#f2c9a8','#b8d4e8','#f0c8d0','#d4c4e8',
+    '#e8b4bc','#d4909a','#fce4ec','#f8bbd0',
   ];
 
   function resizeBalloonCanvas() {
@@ -802,81 +1011,234 @@
   }
   window.addEventListener('resize', resizeBalloonCanvas);
 
-  function makeBalloon() {
-    const size = 28 + Math.random() * 28;
+  /* ── Particle pools ── */
+  let hearts    = [];
+  let fireworks = [];
+  let petals    = [];
+  let spawnTimer = 0;
+
+  /* ── HEARTS floating up ── */
+  function makeHeart() {
+    const size = 22 + Math.random() * 32;
     return {
       x: Math.random() * balloonCanvas.width,
       y: balloonCanvas.height + size + 10,
       size,
-      color: HEART_COLORS[Math.floor(Math.random() * HEART_COLORS.length)],
-      sway:  (Math.random() - 0.5) * 1.2,
-      speed: 1.2 + Math.random() * 1.4,
-      wobbleFreq:  0.03 + Math.random() * 0.03,
+      color: CELEBRATE_COLORS[Math.floor(Math.random() * CELEBRATE_COLORS.length)],
+      sway:  (Math.random() - 0.5) * 1.4,
+      speed: 1.0 + Math.random() * 1.8,
+      wobbleFreq:  0.025 + Math.random() * 0.04,
       wobblePhase: Math.random() * Math.PI * 2,
-      age: 0, opacity: 0,
+      age: 0,
     };
   }
 
   function drawHeart(ctx, cx, cy, size, color, opacity) {
-    ctx.save();
-    ctx.globalAlpha = opacity;
+    ctx.save(); ctx.globalAlpha = opacity;
     const s = size * 0.5;
     ctx.beginPath();
-    ctx.moveTo(cx, cy + s * 0.35);
-    ctx.bezierCurveTo(cx, cy,           cx - s, cy - s * 0.5, cx - s, cy - s * 0.1);
-    ctx.bezierCurveTo(cx - s, cy - s * 0.8, cx, cy - s * 0.9, cx, cy - s * 0.4);
-    ctx.bezierCurveTo(cx, cy - s * 0.9, cx + s, cy - s * 0.8, cx + s, cy - s * 0.1);
-    ctx.bezierCurveTo(cx + s, cy - s * 0.5, cx, cy,           cx, cy + s * 0.35);
+    ctx.moveTo(cx, cy + s*0.35);
+    ctx.bezierCurveTo(cx, cy,         cx-s, cy-s*0.5, cx-s, cy-s*0.1);
+    ctx.bezierCurveTo(cx-s, cy-s*0.8, cx,   cy-s*0.9, cx,   cy-s*0.4);
+    ctx.bezierCurveTo(cx,   cy-s*0.9, cx+s, cy-s*0.8, cx+s, cy-s*0.1);
+    ctx.bezierCurveTo(cx+s, cy-s*0.5, cx,   cy,       cx,   cy+s*0.35);
     ctx.closePath();
     ctx.fillStyle = color; ctx.fill();
-    ctx.strokeStyle = 'rgba(61,47,47,0.22)'; ctx.lineWidth = 1.6; ctx.stroke();
+    ctx.strokeStyle = 'rgba(61,47,47,0.18)'; ctx.lineWidth = 1.4; ctx.stroke();
     ctx.beginPath();
-    ctx.ellipse(cx - s*0.28, cy - s*0.42, s*0.18, s*0.12, -0.5, 0, Math.PI*2);
-    ctx.fillStyle = 'rgba(255,255,255,0.45)'; ctx.fill();
+    ctx.ellipse(cx-s*0.28, cy-s*0.42, s*0.18, s*0.12, -0.5, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.fill();
+    // string
     ctx.beginPath();
-    ctx.moveTo(cx, cy + s*0.35);
-    ctx.quadraticCurveTo(cx + s*0.3, cy + s*0.8, cx, cy + s*1.6);
-    ctx.strokeStyle = 'rgba(61,47,47,0.18)'; ctx.lineWidth = 1.2; ctx.stroke();
+    ctx.moveTo(cx, cy+s*0.35);
+    ctx.quadraticCurveTo(cx+s*0.35, cy+s*0.9, cx, cy+s*1.7);
+    ctx.strokeStyle = 'rgba(61,47,47,0.15)'; ctx.lineWidth = 1.1; ctx.stroke();
     ctx.restore();
   }
 
-  let spawnTimer = 0;
-  const SPAWN_INTERVAL = 18;
-
-  function tickBalloons() {
-    bCtx.clearRect(0, 0, balloonCanvas.width, balloonCanvas.height);
-    spawnTimer++;
-    if (spawnTimer >= SPAWN_INTERVAL) { spawnTimer = 0; balloons.push(makeBalloon()); }
-    balloons = balloons.filter(b => b.y > -b.size * 2);
-    for (const b of balloons) {
-      b.age++; b.y -= b.speed;
-      b.x += b.sway + Math.sin(b.age * b.wobbleFreq + b.wobblePhase) * 0.6;
-      const fadeIn  = Math.min(1, b.age / 30);
-      const fadeOut = Math.min(1, Math.max(0, b.y / (balloonCanvas.height * 0.2)));
-      b.opacity = fadeIn * fadeOut;
-      drawHeart(bCtx, b.x, b.y, b.size, b.color, b.opacity);
+  /* ── FIREWORKS bursting ── */
+  function burst(x, y) {
+    const count  = 28 + Math.floor(Math.random() * 16);
+    const color  = CELEBRATE_COLORS[Math.floor(Math.random() * CELEBRATE_COLORS.length)];
+    const color2 = CELEBRATE_COLORS[Math.floor(Math.random() * CELEBRATE_COLORS.length)];
+    for (let i = 0; i < count; i++) {
+      const angle = (i / count) * Math.PI * 2;
+      const speed = 2.5 + Math.random() * 4.5;
+      fireworks.push({
+        x, y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: 1.0,
+        decay: 0.016 + Math.random() * 0.012,
+        size:  2.5 + Math.random() * 3,
+        color: Math.random() > 0.5 ? color : color2,
+        // shape: circle, star, or heart spark
+        shape: Math.random() > 0.6 ? 'heart' : 'circle',
+      });
     }
-    balloonAnimId = requestAnimationFrame(tickBalloons);
+  }
+
+  function drawFirework(p) {
+    bCtx.save();
+    bCtx.globalAlpha = Math.max(0, p.life);
+    if (p.shape === 'heart') {
+      drawHeart(bCtx, p.x, p.y, p.size * 2.5, p.color, Math.max(0, p.life));
+    } else {
+      bCtx.beginPath();
+      bCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      bCtx.fillStyle = p.color;
+      bCtx.fill();
+    }
+    bCtx.restore();
+  }
+
+  /* ── FLOWER PETALS falling ── */
+  const PETAL_SHAPES = ['🌸','🌺','🌼','✿','❀','🌷'];
+  function makePetal() {
+    return {
+      x:     Math.random() * balloonCanvas.width,
+      y:     -20,
+      emoji: PETAL_SHAPES[Math.floor(Math.random() * PETAL_SHAPES.length)],
+      size:  14 + Math.random() * 18,
+      speed: 1.2 + Math.random() * 1.8,
+      sway:  (Math.random() - 0.5) * 1.5,
+      spin:  (Math.random() - 0.5) * 0.06,
+      angle: Math.random() * Math.PI * 2,
+      wobbleFreq: 0.02 + Math.random() * 0.03,
+      wobblePhase: Math.random() * Math.PI * 2,
+      age:   0,
+      life:  1,
+    };
+  }
+
+  function drawPetal(p) {
+    bCtx.save();
+    bCtx.globalAlpha = Math.min(1, p.life) * Math.min(1, p.age / 20);
+    bCtx.translate(p.x, p.y);
+    bCtx.rotate(p.angle);
+    bCtx.font = `${p.size}px serif`;
+    bCtx.textAlign = 'center';
+    bCtx.textBaseline = 'middle';
+    bCtx.fillText(p.emoji, 0, 0);
+    bCtx.restore();
+  }
+
+  /* ── Burst scheduler ── */
+  let burstTimers = [];
+  function scheduleBursts() {
+    // Initial burst salvo — multiple at once
+    const salvo = () => {
+      for (let i = 0; i < 3; i++) {
+        setTimeout(() => {
+          burst(
+            balloonCanvas.width  * (0.15 + Math.random() * 0.7),
+            balloonCanvas.height * (0.1  + Math.random() * 0.55)
+          );
+        }, i * 180);
+      }
+    };
+    salvo();
+    // Then periodic bursts every ~1.2s
+    const id1 = setInterval(salvo, 1200);
+    // And occasional single bursts offset
+    const id2 = setInterval(() => {
+      burst(
+        balloonCanvas.width  * (0.1 + Math.random() * 0.8),
+        balloonCanvas.height * (0.05 + Math.random() * 0.5)
+      );
+    }, 600);
+    burstTimers.push(id1, id2);
+  }
+
+  /* ── Spawn timers ── */
+  let heartTimer = 0;
+  let petalTimer = 0;
+  const HEART_INTERVAL = 22;
+  const PETAL_INTERVAL = 14;
+
+  /* ── Main tick ── */
+  function tickCelebration() {
+    bCtx.clearRect(0, 0, balloonCanvas.width, balloonCanvas.height);
+
+    /* Hearts */
+    heartTimer++;
+    if (heartTimer >= HEART_INTERVAL) {
+      heartTimer = 0;
+      hearts.push(makeHeart());
+    }
+    hearts = hearts.filter(h => h.y > -h.size * 2);
+    for (const h of hearts) {
+      h.age++; h.y -= h.speed;
+      h.x += h.sway + Math.sin(h.age * h.wobbleFreq + h.wobblePhase) * 0.7;
+      const fadeIn  = Math.min(1, h.age / 25);
+      const fadeOut = Math.min(1, Math.max(0, h.y / (balloonCanvas.height * 0.15)));
+      drawHeart(bCtx, h.x, h.y, h.size, h.color, fadeIn * fadeOut);
+    }
+
+    /* Fireworks */
+    fireworks = fireworks.filter(p => p.life > 0);
+    for (const p of fireworks) {
+      p.x  += p.vx;
+      p.y  += p.vy;
+      p.vy += 0.09; // gentle gravity
+      p.vx *= 0.97;
+      p.life -= p.decay;
+      drawFirework(p);
+    }
+
+    /* Petals */
+    petalTimer++;
+    if (petalTimer >= PETAL_INTERVAL) {
+      petalTimer = 0;
+      petals.push(makePetal());
+    }
+    petals = petals.filter(p => p.y < balloonCanvas.height + 30);
+    for (const p of petals) {
+      p.age++;
+      p.y += p.speed;
+      p.x += p.sway + Math.sin(p.age * p.wobbleFreq + p.wobblePhase) * 0.8;
+      p.angle += p.spin;
+      drawPetal(p);
+    }
+
+    balloonAnimId = requestAnimationFrame(tickCelebration);
   }
 
   function launchBalloons() {
     resizeBalloonCanvas();
     balloonCanvas.style.display = 'block';
-    balloons = []; spawnTimer = 0;
-    for (let i = 0; i < 8; i++) {
-      const b = makeBalloon();
-      b.y = balloonCanvas.height * (0.3 + Math.random() * 0.7);
-      balloons.push(b);
+
+    // Reset all pools
+    hearts = []; fireworks = []; petals = [];
+    heartTimer = 0; petalTimer = 0;
+
+    // Pre-seed hearts so screen isn't empty
+    for (let i = 0; i < 10; i++) {
+      const h = makeHeart();
+      h.y = balloonCanvas.height * (0.2 + Math.random() * 0.7);
+      h.age = 40;
+      hearts.push(h);
     }
+    // Pre-seed petals
+    for (let i = 0; i < 8; i++) {
+      const p = makePetal();
+      p.y = Math.random() * balloonCanvas.height * 0.7;
+      p.age = 30;
+      petals.push(p);
+    }
+
     if (balloonAnimId) cancelAnimationFrame(balloonAnimId);
-    tickBalloons();
+    tickCelebration();
+    scheduleBursts();
   }
 
   function stopBalloons() {
     if (balloonAnimId) { cancelAnimationFrame(balloonAnimId); balloonAnimId = null; }
+    burstTimers.forEach(id => clearInterval(id));
+    burstTimers = [];
     bCtx.clearRect(0, 0, balloonCanvas.width, balloonCanvas.height);
     balloonCanvas.style.display = 'none';
-    balloons = [];
+    hearts = []; fireworks = []; petals = [];
   }
 </script>
 </body>
